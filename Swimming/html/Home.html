@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>Welcome to Eejo Swim Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/AdoptiveStyle.css">
+  <link rel="stylesheet" href="../css/FitForm.css">
+  <link rel="stylesheet" href="../css/Slider.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+  <script src="../js/script.js"></script>
+</head>
+
+<body>
+  <header>
+    <div class="profile" onclick="">
+      <div class="dark-mode-toggle">
+
+        <img src="../images/profile.png" alt="Profile" id="UserPhoto" onclick="toggleProfilePopup()">
+        <div class="profile-popup" id="profilePopup">
+          <label id="lblUserName"> </label>
+          <a href="EditUser.html">Edit Profile</a>
+          <a onclick="{ openPrintWindow('UserID',user,'EejoIDcardDisp','') }">Download ID</a>
+          <a href="../index.html">Logout</a>
+        </div>
+      </div>
+    </div>
+    <div class="logo" >
+      <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+      <img src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
+      <h1 style="align-items:start; text-align: left; margin: 5%;">
+        <b> Eejo <br>
+          Swim Portal</b>
+      </h1>
+    </div>
+
+    <label aria-disabled="true" class="dark-mode-toggle" onclick="toggleDarkMode()"> 🌗 </label>
+
+  </header>
+  <div class="sidebar" id="sidebar">
+    <button onclick="location.href='Home.html'"> Home</button>
+    <button onclick="location.href='event_registration.html'"> Event Registration</button>
+    <button onclick="location.href='password_recovery.html'"> Password Recovery</button>
+    <button onclick="location.href='reports.html'"> Reports</button>  
+      <button onclick="location.href='Eejo_Intro.html'"> Intro</button>  
+
+    
+  </div>
+  
+  <div class="container">
+    <!-- <form> -->
+
+    <h1 id="loginname">Welcome to Eejo Swim Portal</h1>
+
+    <div class="carousel-container" id="carouselContainer">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="Slidcard">
+          <h1> @Eejo </h1>
+          <p class="SlideP">
+
+            Where Champions Are Made! <br>
+
+            To every swimmer chasing their personal best, <br>
+            To every parent cheering with pride from the sidelines, <br>
+            To every coach shaping the future of the sport — This is your arena. Your journey. Your legacy in motion.
+            <br>
+        </div>
+
+        <div class="Slidcard">
+          <h1>Swimmers</h1>
+          <p class="SlideP">
+
+            Every stroke you take is a step toward greatness. This portal is your personal performance journal — a place
+            to
+            record your timings, reflect on your progress, and rise above yesterday’s limits. Whether you're preparing
+            for
+            your first race or your next record-breaking swim, your dedication fuels your success. Push harder. Swim
+            faster.
+            Rise stronger.
+          </p>
+          <br>
+        </div>
+
+        <div class="Slidcard">
+
+          <h1> Parents: </h1>
+          <p class="SlideP">
+
+            Your support is the heartbeat behind every swimmer’s journey. With this portal, you can stay connected to
+            your
+            child’s growth, celebrate milestones, and understand their progress like never before. Be part of their
+            triumphs,
+            their challenges, and their victories — every step of the way.
+
+            <br>
+            <br>
+
+            <br>
+          </p>
+        </div>
+
+        <div class="Slidcard">
+
+          <h1>Coaches</h1>
+          <p class="SlideP">
+
+
+            You are the guiding force behind every champion. Use the portal to analyze performance trends, tailor
+            training
+            strategies, and unlock each swimmer’s full potential. Your insights shape futures, and your leadership
+            builds
+            legacies.
+
+            <br>
+        </div>
+
+
+        <div class="Slidcard">
+
+          <h1>Portal</h1>
+          <p style="word-wrap: break-word; white-space: normal; margin-right: 10%;">
+
+            <b>Track. Analyze. Improve. Succeed.</b>
+            Here, every lap tells a story. Every second matters. And every effort brings us closer to excellence.
+
+            <br>
+            <br>
+            <b>Together, let’s turn effort into excellence and goals into gold.
+              Your journey starts here. Let’s make every stroke count! </b>
+            <br>
+        </div>
+
+        <div class="Slidcard">
+
+          <h1>Swimmers</h1>
+          <p class="SlideP">
+
+            Every stroke you take is a step toward greatness. This portal is your personal performance journal — a place
+            to
+            record your timings, reflect on your progress, and rise above yesterday’s limits. Whether you're preparing
+            for
+            your first race or your next record-breaking swim, your dedication fuels your success. Push harder. Swim
+            faster.
+            Rise stronger.
+            <br>
+        </div>
+
+      </div>
+    </div>
+    <div class="indicators" id="indicators"></div>
+    <div class="carousel-buttons" style="display: flex; flex-direction: row;">
+      <a  onclick="manualSlide(-1)" style="cursor:pointer;" >	
+      <i class="fa fa-toggle-left" style="font-size:48px;color: cornflowerblue;"></i>       
+        
+      </a>
+      <a onclick="manualSlide(1)" style="cursor:pointer;"><i class="fa fa-toggle-right" style="font-size:48px;color: cornflowerblue;"></i></a>
+    </div>
+  </div>
+  <!-- </form> -->
+  <footer>
+    <p>&copy; 2025 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.002</p>
+  </footer>
+</body>
+
+<script>
+  toggleSidebar();
+
+
+  const myDiv = document.getElementById("sidebar");
+
+  //Hide when clicking on the div itself
+  myDiv.addEventListener("click", function () {
+    myDiv.style.display = "none";
+  });
+
+  // Hide when clicking outside the div
+  // document.addEventListener("click", function (event) {
+  //   if (!myDiv.contains(event.target)) {
+  //     myDiv.style.display = "none";
+  //   }
+  // });
+
+
+
+  let user = ReadSessionData('user');
+  if (user) {
+    document.getElementById("loginname").innerText = "Welcome to the Eejo Swim Portal " + user.name + ",";
+    UpdateProfilePage(user);
+  }
+
+
+  const track = document.getElementById("carouselTrack");
+  const cards = document.querySelectorAll(".Slidcard");
+  const container = document.getElementById("carouselContainer");
+  const indicators = document.getElementById("indicators");
+
+  let currentIndex = 0;
+  let intervalId;
+
+  // Create dots
+  cards.forEach((_, i) => {
+    const dot = document.createElement("span");
+    dot.classList.add("dot");
+    if (i === 0) dot.classList.add("active");
+    indicators.appendChild(dot);
+  });
+
+  const dots = document.querySelectorAll(".dot");
+
+  function updateSlider() {
+    const cardWidth = cards[0].offsetWidth + 20;
+    track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
+    dots.forEach(dot => dot.classList.remove("active"));
+    dots[currentIndex].classList.add("active");
+  }
+
+  function slideNext() {
+    currentIndex = (currentIndex + 1) % cards.length;
+    updateSlider();
+  }
+
+  function manualSlide(direction) {
+    currentIndex = (currentIndex + direction + cards.length) % cards.length;
+    updateSlider();
+    restartTimer();
+  }
+
+  function startTimer() {
+    intervalId = setInterval(slideNext, 5000);
+  }
+
+  function stopTimer() {
+    clearInterval(intervalId);
+  }
+
+  function restartTimer() {
+    stopTimer();
+    startTimer();
+  }
+
+  // Pause on hover
+  container.addEventListener("mouseenter", stopTimer);
+  container.addEventListener("mouseleave", startTimer);
+
+  // Start auto-slide
+  startTimer();
+
+</script>
+
+</html>

@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Swimming Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .tabs button { margin-right: 5px; }
+    .filter { margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+<h2>Swimming Dashboard</h2>
+<div class="tabs">
+  <button onclick="showTab('swimmer')">Swimmer Profiles</button>
+  <button onclick="showTab('performance')">Swimmer Performance</button>
+  <button onclick="showTab('events')">Event Summary</button>
+  <button onclick="showTab('coach')">Coach Profiles</button>
+</div>
+
+<div id="swimmer" class="tab">
+  <h3>Swimmer Profiles</h3>
+  <div class="filter">
+    Gender:
+    <select id="genderFilter" onchange="filterSwimmers()">
+      <option value="">All</option>
+      <option value="0">Male</option>
+      <option value="1">Female</option>
+    </select>
+  </div>
+  <div id="swimmerTable"></div>
+  <canvas id="genderChart" width="400" height="200"></canvas>
+</div>
+
+<div id="performance" class="tab">
+  <h3>Swimmer Performance</h3>
+  <div class="filter">
+    Stroke Type:
+    <select id="strokeFilter" onchange="filterPerformance()">
+      <option value="">All</option>
+      <option value="1">Freestyle</option>
+      <option value="2">Backstroke</option>
+      <option value="3">Breaststroke</option>
+      <option value="4">Butterfly</option>
+    </select>
+  </div>
+  <div id="performanceTable"></div>
+  <canvas id="performanceChart" width="400" height="200"></canvas>
+</div>
+
+<div id="events" class="tab">
+  <h3>Event Summary</h3>
+  <div class="filter">
+    Date Range:
+    <input type="date" id="startDate" onchange="filterEvents()">
+    to
+    <input type="date" id="endDate" onchange="filterEvents()">
+  </div>
+  <div id="eventTable"></div>
+  <canvas id="eventChart" width="400" height="200"></canvas>
+</div>
+
+<div id="coach" class="tab">
+  <h3>Coach Profiles</h3>
+  <div class="filter">
+    Name:
+    <input type="text" id="coachNameFilter" oninput="filterCoaches()">
+  </div>
+  <div id="coachTable"></div>
+  <canvas id="coachChart" width="400" height="200"></canvas>
+</div>
+
+<script>
+  // Firebase config placeholder
+  var firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function showTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+  }
+
+  function filterSwimmers() {
+    const gender = document.getElementById('genderFilter').value;
+    // Fetch and filter swimmer data from Firebase
+  }
+
+  function filterPerformance() {
+    const stroke = document.getElementById('strokeFilter').value;
+    // Fetch and filter performance data from Firebase
+  }
+
+  function filterEvents() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    // Fetch and filter event data from Firebase
+  }
+
+  function filterCoaches() {
+    const name = document.getElementById('coachNameFilter').value.toLowerCase();
+    // Fetch and filter coach data from Firebase
+  }
+
+  // Placeholder for chart rendering logic
+</script>
+
+</body>
+</html>

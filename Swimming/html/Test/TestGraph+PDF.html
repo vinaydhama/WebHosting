@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Table and Chart to PDF</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"> </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    select, button { margin: 10px 5px; }
+    canvas { margin-top: 30px; }
+  </style>
+</head>
+<body>
+
+<h2>HTML Table</h2>
+<table id="dataTable">
+  <thead>
+    <tr>
+      <th>Month</th>
+      <th>Sales</th>
+      <th>Profit</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Jan</td><td>100</td><td>30</td></tr>
+    <tr><td>Feb</td><td>150</td><td>50</td></tr>
+    <tr><td>Mar</td><td>200</td><td>70</td></tr>
+    <tr><td>Apr</td><td>250</td><td>90</td></tr>
+  </tbody>
+</table>
+
+<h3>Select Axes</h3>
+<label for="xSelect">X-axis:</label>
+<select id="xSelect"></select>
+<label for="ySelect">Y-axis:</label>
+<select id="ySelect"></select>
+<button onclick="plotGraph()">Plot Graph</button>
+<button onclick="generatePDF()">Download PDF</button>
+
+<div id="chartContainer">
+  <canvas id="chartCanvas" width="800" height="400"></canvas>
+</div>
+
+<script>
+  function populateDropdowns() {
+    const headers = Array.from(document.querySelectorAll('#dataTable thead th')).map(th => th.textContent);
+    const xSelect = document.getElementById('xSelect');
+    const ySelect = document.getElementById('ySelect');
+    xSelect.innerHTML = '';
+    ySelect.innerHTML = '';
+
+    headers.forEach((header, index) => {
+      const optionX = document.createElement('option');
+      optionX.value = index;
+      optionX.text = header;
+      xSelect.appendChild(optionX);
+
+      const optionY = document.createElement('option');
+      optionY.value = index;
+      optionY.text = header;
+      ySelect.appendChild(optionY);
+    });
+  }
+
+  let chartInstance;
+
+  function plotGraph() {
+    const xIndex = parseInt(document.getElementById('xSelect').value);
+    const yIndex = parseInt(document.getElementById('ySelect').value);
+
+    const rows = Array.from(document.querySelectorAll('#dataTable tbody tr'));
+    const labels = rows.map(row => row.cells[xIndex].textContent);
+    const data = rows.map(row => parseFloat(row.cells[yIndex].textContent));
+
+    const ctx = document.getElementById('chartCanvas').getContext('2d');
+    if (chartInstance) chartInstance.destroy(); // Clear previous chart
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: `${document.querySelectorAll('#dataTable thead th')[yIndex].textContent} vs ${document.querySelectorAll('#dataTable thead th')[xIndex].textContent}`,
+          data: data,
+          borderColor: 'green',
+          backgroundColor: 'rgba(0, 128, 0, 0.1)',
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: document.querySelectorAll('#dataTable thead th')[xIndex].textContent } },
+          y: { title: { display: true, text: document.querySelectorAll('#dataTable thead th')[yIndex].textContent } }
+        }
+      }
+    });
+  }
+
+  async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+
+    // Capture table
+    const table = document.getElementById('dataTable');
+    const tableCanvas = await html2canvas(table);
+    const tableImg = tableCanvas.toDataURL('image/png');
+    pdf.text("Monthly Sales and Profit Table", 10, 10);
+    pdf.addImage(tableImg, 'PNG', 10, 20, 180, 0);
+
+    // Capture chart
+    const chart = document.getElementById('chartContainer');
+    const chartCanvas = await html2canvas(chart);
+    const chartImg = chartCanvas.toDataURL('image/png');
+    pdf.addPage();
+    pdf.text("Sales and Profit Chart", 10, 10);
+    pdf.addImage(chartImg, 'PNG', 10, 20, 180, 0);
+
+    pdf.save("table_and_chart.pdf");
+  }
+
+  window.onload = populateDropdowns;
+</script>
+
+</body>
+</html>

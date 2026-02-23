@@ -1,0 +1,73 @@
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        padding: 20px;
+    }
+
+    .carousel-container {
+        width: 100%;
+        max-width: 800px;
+        overflow: hidden;
+        margin: auto;
+        position: relative;
+    }
+
+    .carousel-track {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+    }
+
+   
+.SlideP {
+    word-wrap: break-word;
+    white-space: normal;
+    margin: 0; /* Remove margin-right */
+    padding-right: 10%; /* Optional: use padding instead */
+    overflow-wrap: break-word;
+    width: 100%;
+    box-sizing: border-box; /* Ensures padding is included in width */
+}
+
+.Slidcard {
+    max-width: 800px;
+    width: 100%; /* Ensures it uses full available space */
+    height: auto;
+    margin: 10px;
+    padding: 20px;
+    background: #f0f8ff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+
+    .carousel-buttons {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 0 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .indicators {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .dot {
+        height: 12px;
+        width: 12px;
+        margin: 0 5px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        transition: background-color 0.3s;
+    }
+
+    .dot.active {
+        background-color: #333;
+    }

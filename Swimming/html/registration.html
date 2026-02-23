@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>User Registration Page</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/AdoptiveStyle.css">
+  <link rel="stylesheet" href="../css/FitForm.css">
+  <!-- <link rel="stylesheet" href="../css/GeneralStyle.css"> -->
+  <link rel="stylesheet" href="../css/Pop.css">
+  <link rel="stylesheet" href="../css/PhotoCrop.css">
+  <link rel="stylesheet" href="../css/Slider.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
+
+
+
+  <script src="../js/script.js" defer></script>
+  <script src="../js/Pop.js" defer></script>
+  <script type="module" src="../js/UserRegistration.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+</head>
+
+<body>
+  <header>
+
+    <div class="logo">
+      <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+      <img  src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
+      <h1 style="align-items:start; text-align: left; margin: 5%;">
+        <b> Eejo <br>
+          Swim Portal</b>
+      </h1>
+    </div>
+  <label aria-disabled="true" class="dark-mode-toggle" onclick="toggleDarkMode()"> 🌗 </label>
+
+  </header>
+  <nav>
+    <div class="sidebar" id="sidebar">
+      <button onclick="location.href='../index.html'">Login</button>
+  </nav>
+
+  <div class="container">
+  <h1>Registration Form</h1>
+
+    <!-- <div class="grid"> -->
+    <!--  -->
+    <form id="registrationForm">
+      <label>Name:
+        <input type="text" id="name" required>
+      </label>
+
+
+      <label>Date of Birth:
+        <input type="date" id="dob" required>
+      </label>
+
+
+      <label>Gender:
+        <select id="gender" required>
+          <option value="1">Male</option>
+          <option value="2">Female</option>
+          <option value="3">Other</option>
+        </select>
+      </label>
+
+
+      <label>Email:
+        <input type="email" id="email" required>
+      </label>
+
+
+      <label>Phone Number:
+        <input type="tel" id="phone" required>
+      </label>
+
+
+      <label>School Name:
+        <input type="text" id="schoolname" required>
+      </label>
+
+
+      <label>Club Name:
+        <input type="text" id="clubname" required>
+      </label>
+
+      <label>Password:
+        <input type="password" id="password" required>
+      </label>
+
+
+      <label>Re-enter Password:
+        <input type="password" id="confirmPassword" required>
+      </label>
+
+
+      <label>Role:
+        <select id="role" required>
+          <option value="" disabled selected>My Role</option>
+          <option value="1">Swimmer</option>
+          <option value="2">Parent</option>
+          <option value="3">Coach</option>
+        </select>
+
+      </label>
+
+
+      <label>Photo Upload: </label>
+      <div id="preview">      
+        <img id="UploadedPhoto" style="display:none;">
+      </div>
+      <input type="file" id="photoFile" accept="image/*">
+      <div class="controls">          
+        <button  type="button" onclick="resetCrop()">Reset</button>
+      </div>
+      <progress id="photoProgress" value="0" max="100" style="width: 100%;"></progress>
+      <div id="photoPreview"></div>
+    </label>
+
+
+      <label>School ID:
+        <input type="file" id="id1File" accept="image/*" required>
+        <progress id="id1Progress" value="0" max="100" style="width: 100%;"></progress>
+      </label>
+
+
+      <label>Age Proof:
+        <input type="file" id="id2File" accept="image/*" required>
+        <progress id="id2Progress" value="0" max="100" style="width: 100%;"></progress>
+      </label>
+
+      <button type="submit" onclick="registerSwimmer(event)">Register</button>
+
+    </form>
+  
+
+  </div>
+  <footer>
+    <p>&copy; 2025 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.002</p>
+  </footer>
+ 
+  <div class="overlay" id="overlaypop" >
+    <div class="Msgpopup" id="ActivityPop">
+      <img id="Ejogo" style="margin: 20%;" class="EejoLogo" src="../images/eejo_max.png" alt="WWW.TinyTechniques.com">
+      <i class="fa fa-circle-o-notch fa-spin" style="font-size:64px;color: cornflowerblue;"></i>
+      <h4 id="BusyPopMsg"><b> </b></h1>
+    </div>
+
+    <div class="Msgpopup" id="MessagePop">
+      <h1 style="column-fill: auto; color: white; background-color: rgb(22, 1, 211); text-align: justify;">Eejo portal </h1>
+      <p class="SlideP" id="popupMessage"></p>
+      <button class="Cancelbtn" onclick="ClearAllPop()">Close</button>
+    </div>
+  </div>
+
+
+</body>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+const photoFile = document.getElementById('photoFile');
+const image = document.getElementById('UploadedPhoto');
+
+photoFile.addEventListener('change', function (e) {
+const files = e.target.files;
+if (files && files.length > 0) {
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    image.src = event.target.result;
+    image.style.display = 'block';
+
+    if (cropper) {
+      cropper.destroy();
+    }
+
+    cropper = new Cropper(image, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+      responsive: true,
+    });
+  };
+  reader.readAsDataURL(files[0]);
+}
+});
+});
+
+
+let cropper;
+</script>
+
+</html>

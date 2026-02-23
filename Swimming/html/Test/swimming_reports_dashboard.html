@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Swimming Reports Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .tab { overflow: hidden; border-bottom: 1px solid #ccc; }
+    .tab button {
+      background-color: inherit;
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      transition: 0.3s;
+    }
+    .tab button:hover { background-color: #ddd; }
+    .tab button.active { background-color: #ccc; }
+    .tabcontent {
+      display: none;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-top: none;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+</head>
+<body>
+
+<h2>Swimming Reports Dashboard</h2>
+
+<div class="tab">
+  <button class="tablinks" onclick="openTab(event, 'SwimmerProfile')">Swimmer Profile</button>
+  <button class="tablinks" onclick="openTab(event, 'SwimmerPerformance')">Swimmer Performance</button>
+  <button class="tablinks" onclick="openTab(event, 'EventSummary')">Event Summary</button>
+  <button class="tablinks" onclick="openTab(event, 'CoachProfile')">Coach Profile</button>
+</div>
+
+<div id="SwimmerProfile" class="tabcontent">
+  <h3>Swimmer Profile Report</h3>
+  <table id="swimmerTable"><thead><tr><th>Name</th><th>DOB</th><th>Gender</th><th>Height</th><th>Weight</th><th>Achievements</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div id="SwimmerPerformance" class="tabcontent">
+  <h3>Swimmer Performance Report</h3>
+  <table id="performanceTable"><thead><tr><th>Swimmer ID</th><th>Event ID</th><th>Timing</th><th>Stroke</th><th>Distance</th><th>Good Things</th><th>To Improve</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div id="EventSummary" class="tabcontent">
+  <h3>Event Summary Report</h3>
+  <table id="eventTable"><thead><tr><th>Event Name</th><th>Type</th><th>Level</th><th>Date</th><th>Location</th><th>Organizer</th></tr></thead><tbody></tbody></table>
+</div>
+
+<div id="CoachProfile" class="tabcontent">
+  <h3>Coach Profile Report</h3>
+  <table id="coachTable"><thead><tr><th>Name</th><th>DOB</th><th>Gender</th><th>Height</th><th>Weight</th><th>Achievements</th></tr></thead><tbody></tbody></table>
+</div>
+
+<script>
+  import { firebaseConfig } from "./DFBC.js";
+//   const firebaseConfig = {
+//     apiKey: "AIzaSyAHqPVFfpZeIkfp3A1OiMEezo4YLHukqaE",
+//     authDomain: "riviera-certificates-test.firebaseapp.com",
+//     projectId: "riviera-certificates-test",
+//     storageBucket: "riviera-certificates-test.appspot.com",
+//     messagingSenderId: "651682049198",
+//     appId: "1:651682049198:web:4b956063884b86d50bd13f"
+// };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function openTab(evt, tabName) {
+    const tabcontent = document.getElementsByClassName("tabcontent");
+    for (let i = 0; i < tabcontent.length; i++) tabcontent[i].style.display = "none";
+    const tablinks = document.getElementsByClassName("tablinks");
+    for (let i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(" active", "");
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  function loadSwimmerProfile() {
+    db.ref("swimmer").once("value", snapshot => {
+      const tbody = document.querySelector("#swimmerTable tbody");
+      tbody.innerHTML = "";
+      snapshot.forEach(child => {
+        const data = child.val();
+        const row = `<tr><td>${data.Name}</td><td>${data.DOB}</td><td>${data.Gender}</td><td>${data.Height}</td><td>${data.Weight}</td><td>${(data.MyAcheivements || []).join(", ")}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    });
+  }
+
+  function loadSwimmerPerformance() {
+    db.ref("swimmerRecords").once("value", snapshot => {
+      const tbody = document.querySelector("#performanceTable tbody");
+      tbody.innerHTML = "";
+      snapshot.forEach(child => {
+        const data = child.val();
+        const row = `<tr><td>${data.Swimmer_id}</td><td>${data.Eventid}</td><td>${data.Timeings}</td><td>${data.StrokeType}</td><td>${data.Distence}</td><td>${data.GoodThings}</td><td>${data.ToImprove}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    });
+  }
+
+  function loadEventSummary() {
+    db.ref("events").once("value", snapshot => {
+      const tbody = document.querySelector("#eventTable tbody");
+      tbody.innerHTML = "";
+      snapshot.forEach(child => {
+        const data = child.val();
+        const row = `<tr><td>${data.EventName}</td><td>${data.EventType}</td><td>${data.EventLevel}</td><td>${data.EventDate}</td><td>${data.EventLocation}</td><td>${data.Organiser}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    });
+  }
+
+  function loadCoachProfile() {
+    db.ref("Coach").once("value", snapshot => {
+      const tbody = document.querySelector("#coachTable tbody");
+      tbody.innerHTML = "";
+      snapshot.forEach(child => {
+        const data = child.val();
+        const row = `<tr><td>${data.Name}</td><td>${data.DOB}</td><td>${data.Gender}</td><td>${data.Height}</td><td>${data.Weight}</td><td>${(data.MyAcheivements || []).join(", ")}</td></tr>`;
+        tbody.innerHTML += row;
+      });
+    });
+  }
+
+  window.onload = function() {
+    loadSwimmerProfile();
+    loadSwimmerPerformance();
+    loadEventSummary();
+    loadCoachProfile();
+    document.querySelector(".tablinks").click();
+  };
+</script>
+
+</body>
+</html>

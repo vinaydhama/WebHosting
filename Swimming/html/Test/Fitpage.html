@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Form</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 600px;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input, textarea, select, button {
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+      form {
+        padding: 20px;
+      }
+
+      input, textarea, select, button {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form id="registrationForm" class="card">
+      <div class="card">
+        <label>Name:
+          <input type="text" id="name" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Date of Birth:
+          <input type="date" id="dob" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Gender:
+          <select id="gender" required>
+            <option value="1">Male</option>
+            <option value="2">Female</option>
+            <option value="3">Other</option>
+          </select>
+        </label>
+      </div>
+      <div class="card">
+        <label>Email:
+          <input type="email" id="email" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Phone Number:
+          <input type="tel" id="phone" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>School Name:
+          <input type="tel" id="schoolname" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Club Name:
+          <input type="tel" id="clubname" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Password:
+          <input type="password" id="password" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Re-enter Password:
+          <input type="password" id="confirmPassword" required>
+        </label>
+      </div>
+      <div class="card">
+        <label>Role:
+          <select id="role" required>
+            <option value="" disabled selected>My Role</option>
+            <option value="1">Swimmer</option>
+            <option value="2">Parent</option>
+            <option value="3">Coach</option>
+          </select>
+
+        </label>
+      </div>
+      <div class="card">
+        <label>Photo Upload:
+          <input type="file" id="photoFile" accept="image/*" required>
+          <progress id="photoProgress" value="0" max="100" style="width: 100%;"></progress>
+        </label>
+      </div>
+      <div class="card">
+        <label>School ID:
+          <input type="file" id="id1File" accept="image/*" required>
+          <progress id="id1Progress" value="0" max="100" style="width: 100%;"></progress>
+        </label>
+      </div>
+      <div class="card">
+        <label>Age Proof:
+          <input type="file" id="id2File" accept="image/*" required>
+          <progress id="id2Progress" value="0" max="100" style="width: 100%;"></progress>
+        </label>
+      </div>
+      <div class="card">
+        <button type="submit">Register</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

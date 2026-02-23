@@ -1,0 +1,204 @@
+  
+
+.side-by-side-container {
+  display: flex;
+  gap: 20px; /* space between divs */
+  flex-wrap: wrap; /* allows wrapping on smaller screens */
+  justify-content: space-between;
+  padding: 20px;
+}
+.headecls
+{  
+  align-items:stretch;  
+  margin: 0%;
+  padding: 5px;
+}
+
+.side-by-side-container > div {
+  flex: 1 1 45%; /* grow, shrink, base width */
+  min-width: 300px;
+  background-color: #1e3a8a;
+  color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+
+/* Base styles */
+/* body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #001f3f, #003366);
+  color: #fff;
+  transition: background 0.3s, color 0.3s;
+} */
+
+body.light-mode {
+  background: #154f82;
+  color: #000;
+}
+
+body.light-mode .top-banner {
+  background-color: #cce6ff;
+}
+
+.logo {
+  align-content: center;
+  font-size: 24px;
+  font-stretch: expanded;
+  display: flex;
+  align-items:center;
+  max-height: 250px;
+}
+
+.profile {
+  position: relative;
+  cursor: pointer;  
+}
+
+.profile img {
+  width: 80px;
+  height: 80px;
+  border-radius: 45%;
+  margin-left: 20%;
+  margin-top: -60%;
+}
+
+.profile-popup {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background-color: #002244;
+  border: 1px solid #005f99;
+  border-radius: 5px;
+  padding: 10px;
+  z-index: 1000;
+}
+
+body.light-mode .profile-popup {
+  background-color: #e6f2ff;
+  border-color: #99ccff;
+}
+
+.profile-popup a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  padding: 5px 10px;
+}
+
+body.light-mode .profile-popup a {
+  color: #000;
+}
+
+.profile-popup a:hover {
+  background-color: #005f99;
+}
+
+body.light-mode .profile-popup a:hover {
+  background-color: #cce6ff;
+}
+
+.sidebar {
+  height: auto;
+display: flex;
+flex-direction: column; /* Align items horizontally */
+justify-content: space-between; /* Optional: adds spacing between items */
+align-items:start; /* Optional: aligns items vertically */
+gap: 5px; /* Optional: spacing between items */
+
+  /* width: 220px; */
+  background-color: #002244;
+  padding: 20px;
+  transition: width 0.3s ease;
+}
+
+body.light-mode .sidebar {
+  background-color: #e6f2ff;
+}
+
+.sidebar.folded {
+  display: none;
+  width: 0;
+}
+
+.sidebar button {
+  display: block;
+  background: none;
+  border: none;
+  color: #fff;
+  height: auto;
+  margin: 10px 0;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+body.light-mode .sidebar button {
+  color: #000;
+}
+
+.sidebar button:hover {
+  background-color: #005f99;
+}
+
+body.light-mode .sidebar button:hover {
+  background-color: #cce6ff;
+}
+
+.main-content {
+  display: flex;
+  flex-grow: 1;
+  padding: 20px;
+}
+
+/* Toggle button */
+.toggle-sidebar {  
+  position: absolute;
+  width: auto;  
+  top: 10px;
+  left: 10px;
+  background-color: #005f99;
+  border: none;
+  color: #fff;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+body.light-mode .toggle-sidebar {
+  background-color: #99ccff;
+  color: #000;
+}
+
+/* Dark mode toggle */
+.dark-mode-toggle {  
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+  .profile {
+    margin-top: 10px;
+  }
+
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: auto;
+    height: auto;
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .toggle-sidebar {
+    position: static;
+    margin: 10px;
+  }

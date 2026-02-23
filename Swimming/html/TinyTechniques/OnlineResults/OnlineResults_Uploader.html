@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <script type="module" src="../../../js/PDFUploader.js" defer></script>
+  
+<head>
+  <meta charset="utf-8" />
+  <title>Upload PDF to Firebase Storage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    .card { max-width: 720px; border: 1px solid #ddd; border-radius: 12px; padding: 1.25rem; }
+    .row { margin: 0.75rem 0; }
+    #progress-wrap { display: none; margin-top: 1rem; }
+    progress { width: 100%; height: 14px; }
+    #status { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    #preview { margin-top: 0.5rem; font-size: 0.95rem; }
+    .muted { color: #666; font-size: 0.9rem; }
+    button { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .success { color: #0a7a1b; }
+    .error { color: #b00020; }
+    .flex { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  </style>
+</head>
+<body>
+  <!-- <h1>Upload a PDF to Firebase Storage</h1> -->
+  <div class="card">
+    <div class="row">
+      <label for="pdfFile"><strong>Select PDF</strong></label><br/>
+      <input id="pdfFile" type="file" accept="application/pdf" />
+      <div id="preview" class="muted">Max size example: ~20MB (adjust in rules if needed).</div>
+    </div>
+
+    <div class="row flex">
+      <button id="btnUpload" disabled>Upload PDF</button>
+      <span id="status" class="muted">Choose a PDF to enable upload.</span>
+    </div>
+
+    <div id="progress-wrap">
+      <label>Upload progress</label>
+      <progress id="progress" value="0" max="100">0%</progress>
+      <div><span id="pct">0%</span></div>
+    </div>
+
+    <div id="result" class="row"></div>
+  </div>
+
+  <!-- Firebase SDKs (v9+ modular via CDN) -->
+ 
+</body>
+</html>

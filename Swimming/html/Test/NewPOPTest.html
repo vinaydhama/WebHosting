@@ -1,0 +1,88 @@
+<html>
+
+<script src="../../js/Pop.js"> </script>
+<!-- <link rel="stylesheet" href="../../css/Pop.css"> -->
+<style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Overlay background */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none; /* Hidden by default */
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    /* Popup box */
+    .Msgpopup {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 90%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    /* Show overlay */
+    .overlay.show {
+      display: flex;
+    }
+
+    /* Button */
+    .Cancelbtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+  </style>
+
+<body>
+    <button onclick="{ClearAllPop();ShowMessagepop('Test Msg To Disp')}"> msgpop</button>
+    <button onclick="{ ClearAllPop(); ShowActivitypop('Test Msg To Disp')}"> Actpop</button>
+    <button onclick="{ClearAllPop()}"> Clear</button>
+
+
+    <div class="overlay" id="overlaypop1">
+        <div class="Msgpopup">
+          <h2>Hello!</h2>
+          <p>This is a centered popup.</p>
+          <button class="Cancelbtn" onclick="ClearAllPop()">Close</button>
+        </div>
+      </div>
+
+
+    <div class="overlay" id="overlaypop" >
+        <div class="Msgpopup" id="ActivityPop">        
+            <img id="Ejogo" style="margin-top: 20%;" class="EejoLogo" src="../../images/eejo_max.png"
+              alt="WWW.TinyTechniques.com">
+    <button onclick="{ ClearAllPop();}">X</button>
+
+            <h4 id="BusyPopMsg"><b> </b></h1>        
+        </div>
+        <div class="Msgpopup" id="MessagePop" style="display: none;" >
+          <h1 style="column-fill: auto; color: white; background-color: rgb(22, 1, 211); text-align: justify;">Eejo portal
+          </h1>
+          <p id="popupMessage"></p>
+          <button class="Cancelbtn" onclick="ClearAllPop()">Close</button>
+
+        </div>
+      </div>
+    </div>
+  
+
+</body>
+</html>

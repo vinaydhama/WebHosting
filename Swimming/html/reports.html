@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>Reports Page</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/AdoptiveStyle.css">
+  <link rel="stylesheet" href="../css/FitForm.css">
+  <link rel="stylesheet" href="../css/Slider.css">
+  <link rel="stylesheet" href="../css/TimerStyle.css">
+  <link rel="stylesheet" href="../css/Pop.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="../js/script.js" defer></script>
+  <script type="module" src="../js/AddSwimmerRecord.js"></script>
+  <script src="../js/Utility.js"></script>
+  <script src="../js/Pop.js"></script>
+
+
+  <script src="../js/script.js"></script>
+  <script src="../js/GraphVisuliser.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+
+  <header class="headecls">
+    <div class="profile" onclick="">
+      <div class="dark-mode-toggle">
+
+        <img src="../images/profile.png" alt="Profile" id="UserPhoto" onclick="toggleProfilePopup()">
+        <div class="profile-popup" id="profilePopup">
+          <label id="lblUserName"> </label>
+          <a href="EditUser.html">Edit Profile</a>
+          <a onclick="{ openPrintWindow('UserID',user,'EejoIDcardDisp','') }">Download ID</a>
+          <a href="../index.html">Logout</a>
+        </div>
+      </div>
+    </div>
+    <div class="logo">
+      <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+      <img src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
+      <h1 style="align-items:start; text-align: left; margin: 5%;">
+        <b> Eejo <br>
+          Swim Portal</b>
+      </h1>
+    </div>
+
+    <label aria-disabled="true" class="dark-mode-toggle" onclick="toggleDarkMode()"> 🌗 </label>
+
+  </header>
+  <div class="sidebar" id="sidebar">
+    <button onclick="location.href='Home.html'"> Home</button>
+    <button onclick="location.href='event_registration.html'"> Event Registration</button>
+    <button onclick="location.href='password_recovery.html'"> Password Recovery</button>
+    <button onclick="location.href='reports.html'"> Reports</button>    <button onclick="location.href='Eejo_Intro.html'"> Intro</button>
+  </div>
+
+  <div class="container">
+    <h1 style="align-items: center; ">Swimmer Performance Report</h1>
+
+
+    <!-- <form> -->
+
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+      <button title="Add Record" class="add-btn"
+        onclick="{toggleProfilePopup('AddRecodeddiv'); document.getElementById('AddRecodeddiv').scrollIntoView({ behavior: 'smooth' }); } "><i
+          class="fas fa-add"></i> </button>
+      <button title="Filter Record" class="filter-btn" onclick="{toggleProfilePopup('filters')}"><i
+          class="fas fa-filter"></i> </button>
+      <button title="Analyse " class="Analyse-btn"
+        onclick=" { document.getElementById('chartVis').innerHTML=''; toggleProfilePopup('chartContainer'); plotVisualiser();  document.getElementById('chartContainer').scrollIntoView({ behavior: 'smooth' });}"><i
+          class="fas fa-atom"></i> </button>
+
+      <button class="print-btn"
+        onclick="{tableToJSON('performanceTable'); window.open(`PrintReport.html`, 'Print Report ', 'width=800,height=600'); }"><i
+          class='fas fa-print'></i></button>
+
+      <!-- <button  title="Print Report" class="print-btn" onclick="{tableToJSON('performanceTable'); window.open(`PrintReport.html`, 'Print Report ', 'width=800,height=600'); }"><i class="'fas fa-print"></i> </button> -->
+
+    </div>
+    <!-- </form> -->
+    <div id="filters" style="display: none;">
+      <div>
+        <input type="text" id="filterSwimmerId" placeholder="Filter by Swimmer ID" onkeyup="filterTable()" />
+        <input type="text" id="filterEventId" placeholder="Filter by Event ID" onkeyup="filterTable()" />
+        <input type="text" id="filterStroke" placeholder="Filter by Stroke" onkeyup="filterTable()" />
+        <input type="text" id="filterDistance" placeholder="Filter by Distance" onkeyup="filterTable()" />
+        <button id="ResetFilter" onclick="{document.getElementById('filters').style.display='none'}">Reset</button>
+      </div>
+    </div>
+
+    <form class="flex-row " style="display: block;">
+      <table id="performanceTable" class="table">
+        <thead>
+          <tr>
+            <th id="SlNoTh">Sl.No</th>
+            <th id="Rankth">Rank</th>
+
+            <th id="EventIDth">Event ID</th>
+            <th id="HeatDateTimeth">Heat DateTime</th>
+
+            <th id="Stroketh">Stroke</th>
+            <th id="Distanceth">Distance</th>
+            <th id="Timeth">Time</th>
+
+            <th id="GoodThingsth" onclick=>Good Things</th>
+            <th id="ToImproveth" onclick=>To Improve</th>
+            <th id="EditTH">Edit</th>
+
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </form>
+
+
+    <form id="AddRecodeddiv" style="display: none;">
+      <div class="flex-col">
+        <label for="eventType">Event Type</label>
+        <select id="eventType">
+          <option value="Training">Training</option>
+          <option value="Club">Club Level</option>
+          <option value="Interschool">Interschool</option>
+          <option value="State">State</option>
+          <option value="National">National</option>
+        </select>
+      </div>
+
+      <!-- Event Details (shown if not Training) -->
+      <div id="eventDetails" class="hidden">
+        <div class="flex-col">
+          <label for="eventNameDropdown">Event Name</label>
+          <select id="eventNameDropdown">
+            <option value="">-- Select Existing Event --</option>
+          </select>
+        </div>
+
+        <div class="flex-col">
+          <label for="newEventName">New Event Name (if not found)</label>
+          <input type="text" id="newEventName" placeholder="Enter new event name">
+        </div>
+
+        <div class="flex-col">
+          <label for="eventDate">Event Date</label>
+          <input type="date" id="eventDate">
+        </div>
+
+        <div class="flex-col">
+          <label for="eventAddress">Event Address</label>
+          <textarea id="eventAddress" rows="3"></textarea>
+        </div>
+
+        <div class="flex-col">
+          <label for="eventLocation">Event GPS Location</label>
+          <input type="text" id="eventLocation" placeholder="Latitude, Longitude">
+        </div>
+
+        <div class="flex-col">
+          <button id="addEventButton" class="hidden">Add New Event</button>
+        </div>
+      </div>
+
+      <!-- Swimmer Info -->
+      <div class="flex-row">
+        <div class="flex-col">
+          <label for="swimmerId">Swimmer ID</label>
+          <input type="text" id="swimmerId" value="SESSION_SWIMMER_ID" readonly>
+        </div>
+        <div class="flex-col">
+          <label for="swimmerName">Swimmer Name</label>
+          <input type="text" id="swimmerName" value="SESSION_SWIMMER_NAME" readonly>
+        </div>
+      </div>
+
+
+      <!-- Performance Entry -->
+      <div class="flex-row">
+        <div class="flex-col">
+          <label for="strokeType">Stroke Type</label>
+          <select id="strokeType">
+            <option value="Freestyle">Freestyle</option>
+            <option value="Breaststroke">Breaststroke</option>
+            <option value="Butterfly">Butterfly</option>
+            <option value="Backstroke">Backstroke</option>
+          </select>
+
+
+        </div>
+
+        <div class="flex-col">
+          <label for="distance">Distance</label>
+          <select id="distance">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="400">400</option>
+            <option value="800">800</option>
+            <option value="Other">Other</option>
+          </select>
+          <input type="text" id="customDistance" class="hidden" placeholder="Enter custom distance">
+        </div>
+      </div>
+
+      <div class="flex-col">
+        <label for="HeatDateTime">Heat DateTime</label>
+        <input type="datetime-local" id="HeatDateTime" placeholder="e.g., 01:23.456">
+
+        <button type="button" id="openTimer" data-target="#recordTime" onclick="{toggleProfilePopup('timerDialog')}"> <i
+            class="fa-solid fa-stopwatch" style="font-size:24px;"></i> </button>
+        <div id="timerDialog" role="dialog" aria-modal="true" aria-labelledby="timerTitle" style="display: none;">
+          <div class="dlg-header">
+            <h2 id="timerTitle" class="dlg-title">Timer</h2>
+            <button class="close-btn" type="button" id="closeTimer" aria-label="Close timer">x</button>
+          </div>
+
+          <div id="display" class="timer" aria-live="polite" aria-atomic="true">00:00:00.00</div>
+
+          <div class="grid">
+            <button title="Start" id="startBtn" class="secondary" type="button"><i class="fas fa-play"></i></button>
+            <button title="Stop" id="stopBtn" class="secondary" type="button" disabled><i
+                class="fas fa-stop"></i></button>
+            <button title="Reset" id="resetBtn" class="danger" type="button" disabled><i
+                class="fas fa-refresh "></i></button>
+            <button title="Record" id="recordBtn" type="button"><i class="fas fa-record-vinyl"></i></button>
+
+          </div>
+
+          <div class="kbd-hints">Press <kbd>S</kbd>, <kbd>T</kbd>, <kbd>R</kbd>, or <kbd>Enter</kbd>. <em>Esc</em>
+            closes the
+            dialog.</div>
+        </div>
+
+        <label for="recordTime">Timings</label>
+        <input type="text" id="recordTime" placeholder="e.g., 01:23.456">
+
+
+        <label for="rankentry">Rank</label>
+        <input type="text" id="rankentry" placeholder="01">
+      </div>
+
+      <button type="button" id="AddRecordbtn">Add Record</button>
+      <button id="CancelAddRecordbtn"
+        onclick="{document.getElementById('AddRecodeddiv').style.display='none'; document.getElementById('performanceTable').scrollIntoView({ behavior: 'smooth' });}  ">Cancel</button>
+
+    </form>
+    <div id="chartContainer">
+      <canvas id="chartCanvas">
+        <h2>Visualizations</h2>
+
+      </canvas>
+    </div>
+  </div>
+
+
+
+
+  <div id="AddRecodeddiv" style="display: none;">
+    <div class="flex-col">
+      <label for="eventType">Event Type</label>
+      <select id="eventType">
+        <option value="Training">Training</option>
+        <option value="Club">Club Level</option>
+        <option value="Interschool">Interschool</option>
+        <option value="State">State</option>
+        <option value="National">National</option>
+      </select>
+      <!-- Event Details (shown if not Training) -->
+      <div id="eventDetails" class="hidden">
+        <div class="flex-col">
+          <label for="eventNameDropdown">Event Name</label>
+          <select id="eventNameDropdown">
+            <option value="">-- Select Existing Event --</option>
+          </select>
+        </div>
+
+        <div class="flex-col">
+          <label for="newEventName">New Event Name (if not found)</label>
+          <input type="text" id="newEventName" placeholder="Enter new event name">
+        </div>
+
+        <div class="flex-col">
+          <label for="eventDate">Event Date</label>
+          <input type="date" id="eventDate">
+        </div>
+
+        <div class="flex-col">
+          <label for="eventAddress">Event Address</label>
+          <textarea id="eventAddress" rows="3"></textarea>
+        </div>
+
+        <div class="flex-col">
+          <label for="eventLocation">Event GPS Location</label>
+          <input type="text" id="eventLocation" placeholder="Latitude, Longitude">
+        </div>
+
+        <div class="flex-col">
+          <button id="addEventButton" class="hidden">Add New Event</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-row">
+      <div class="flex-col">
+        <label for="swimmerId">Swimmer ID</label>
+        <input type="text" id="swimmerId" value="SESSION_SWIMMER_ID" readonly>
+      </div>
+      <div class="flex-col">
+        <label for="swimmerName">Swimmer Name</label>
+        <input type="text" id="swimmerName" value="SESSION_SWIMMER_NAME" readonly="true">
+      </div>
+    </div>
+
+
+    <!-- Performance Entry -->
+    <div class="flex-row">
+      <div class="flex-col">
+        <label for="strokeType">Stroke Type</label>
+        <select id="strokeType">
+          <option value="Freestyle">Freestyle</option>
+          <option value="Breaststroke">Breaststroke</option>
+          <option value="Butterfly">Butterfly</option>
+          <option value="Backstroke">Backstroke</option>
+        </select>
+
+
+      </div>
+
+      <div class="flex-col">
+        <label for="distance">Distance</label>
+        <select id="distance">
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+          <option value="400">400</option>
+          <option value="800">800</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="customDistance" class="hidden" placeholder="Enter custom distance">
+      </div>
+    </div>
+
+    <div class="flex-col">
+      <label for="HeatDateTime">Heat DateTime</label>
+      <input type="datetime-local" id="HeatDateTime" placeholder="e.g., 01:23.456">
+
+      <label for="recordTime">Timings</label>
+      <input type="text" id="recordTime" placeholder="e.g., 01:23.456">
+
+      <label for="rankentry">Rank</label>
+      <input type="text" id="rankentry" placeholder="01">
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 600px;">
+      <button id="AddRecordbtn">Add Record</button>
+      <button id="CancelAddRecordbtn"
+        onclick="{document.getElementById('AddRecodeddiv').style.display='none'}">Cancel</button>
+    </div>
+  </div>
+
+  <div id="filters" style="display: none;">
+    <input type="text" id="filterSwimmerId" placeholder="Filter by Swimmer ID" onkeyup="filterTable()" />
+    <input type="text" id="filterEventId" placeholder="Filter by Event ID" onkeyup="filterTable()" />
+    <input type="text" id="filterStroke" placeholder="Filter by Stroke" onkeyup="filterTable()" />
+    <input type="text" id="filterDistance" placeholder="Filter by Distance" onkeyup="filterTable()" />
+    <!-- <button  id='ShowAddRecord' onclick="{document.getElementById('filters').style.display='block'}">Filter</button> -->
+    <button id="ResetFilter" onclick="{document.getElementById('filters').style.display='none'}">Reset</button>
+
+  </div>
+
+  <div id="chartVis"></div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 <a href="www.g.com">Tiny Techniques</a> v 1.0.001</p>
+  </footer>
+
+
+
+  <div class="overlay" id="overlaypop">
+    <div class="Msgpopup" id="ActivityPop">
+      <img id="Ejogo" style="margin: 20%;" class="EejoLogo" src="../images/eejo_max.png" alt="WWW.TinyTechniques.com">
+      <i class="fa fa-circle-o-notch fa-spin" style="font-size:64px;color: cornflowerblue;"></i>
+      <h4 id="BusyPopMsg"><b> </b></h1>
+    </div>
+
+    <div class="Msgpopup" id="MessagePop">
+      <h1 style="column-fill: auto; color: white; background-color: rgb(22, 1, 211); text-align: justify;">Eejo portal
+      </h1>
+      <p class="SlideP" id="popupMessage"></p>
+      <button class="Cancelbtn" onclick="ClearAllPop()">Close</button>
+    </div>
+  </div>
+
+</body>
+<script>
+
+  function tableToJSON(tablename) {
+    tableperformance = document.getElementById(tablename);
+    const dheaders = Array.from(tableperformance.querySelectorAll('thead th')).map(h => h.textContent.trim());
+    const drows = Array.from(tableperformance.querySelectorAll('tbody tr')).map(tr => {
+      const cells = Array.from(tr.children);
+      const obj = {};
+      cells.forEach((td, i) => obj[dheaders[i] || `col${i + 1}`] = td.textContent.trim());
+      return obj;
+    });
+    // return { dheaders, drows };
+
+
+    const payload = {
+      title: 'Eejo Swimmer Performance Report',
+      headers: dheaders,
+      rows: drows,
+
+    }
+
+    sessionStorage.setItem("PrintTable", JSON.stringify(payload));
+  }
+
+</script>
+<script>
+  // Elements
+  // const $open = document.getElementById('openTimer');
+  const $dialog = document.getElementById('timerDialog');
+  const $close = document.getElementById('closeTimer');
+
+  const $display = document.getElementById('display');
+  const $start = document.getElementById('startBtn');
+  const $stop = document.getElementById('stopBtn');
+  const $reset = document.getElementById('resetBtn');
+  const $record = document.getElementById('recordBtn');
+
+  // Timer state
+  let running = false;
+  let startTime = 0;   // performance.now() when started
+  let elapsed = 0;     // accumulated ms
+  let rafId = null;
+  let targetSelector = '#recordTime';  // default target
+
+  // Helpers
+  const pad2 = (n) => String(n).padStart(2, '0');
+  function formatTime(ms) {
+    ms = Math.max(0, ms | 0);
+    const cs = Math.floor((ms % 1000));  // 0..99
+    const totalSeconds = Math.floor(ms / 1000);
+    const s = totalSeconds % 60;
+    const m = Math.floor(totalSeconds / 60) % 60;
+    const h = Math.floor(totalSeconds / 3600);
+    return `${pad2(m)}:${pad2(s)}.${pad2(cs)}`;
+  }
+  function updateDisplay() {
+    $display.textContent = formatTime(elapsed);
+  }
+  function tick() {
+    elapsed = performance.now() - startTime;
+    updateDisplay();
+    rafId = requestAnimationFrame(tick);
+  }
+  function start() {
+    if (running) return;
+    running = true;
+    startTime = performance.now() - elapsed; // resume
+    tick();
+    $start.disabled = true;
+    $stop.disabled = false;
+    $reset.disabled = false;
+  }
+  function stop() {
+    if (!running) return;
+    running = false;
+    cancelAnimationFrame(rafId);
+    $start.disabled = false;
+    $stop.disabled = true;
+    // keep reset enabled
+  }
+  function reset() {
+    stop();
+    elapsed = 0;
+    updateDisplay();
+    $reset.disabled = true;
+  }
+  function record() {
+    const value = formatTime(elapsed);
+    const input = document.querySelector(targetSelector);
+    if (!input) {
+      alert(`Could not find target field (${targetSelector}).`);
+      return;
+    }
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    // Keep dialog open so user can continue; close if you prefer:
+    // $dialog.close();
+  }
+
+  // Wire up buttons
+  $start.addEventListener('click', start);
+  $stop.addEventListener('click', stop);
+  $reset.addEventListener('click', reset);
+  $record.addEventListener('click', record);
+
+  // Keyboard shortcuts (active while dialog is open)
+  function onKeydown(e) {
+    if (!$dialog.open) return;
+    if (e.key === 's' || e.key === 'S') { e.preventDefault(); start(); }
+    else if (e.key === 't' || e.key === 'T') { e.preventDefault(); stop(); }
+    else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); reset(); }
+    else if (e.key === 'Enter') { e.preventDefault(); record(); }
+  }
+  window.addEventListener('keydown', onKeydown);
+
+  $close.addEventListener('click', () => {
+    // Stop the timer loop if running
+    stop();
+    toggleProfilePopup('timerDialog')
+  });
+
+  // When dialog closes (via ESC or close()) — restore scroll & focus
+  $dialog.addEventListener('close', () => {
+    document.documentElement.style.overflow = '';
+    $open.focus();
+  });
+
+  // Init display once
+  updateDisplay();
+</script>
+<script>
+  let user = ReadSessionData("user")
+  if (user) {
+    UpdateProfilePage(user);
+  }
+</script>
+
+</html>

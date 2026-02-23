@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+  
+  <title>Live Swim Leaderboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #0a0a0c;
+      padding: 20px;
+      color: rgb(178, 248, 1);
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    #timer {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    #metadata {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    .leaderboard {
+      width: 800px;
+      margin: auto;
+      border-collapse: collapse;
+    }
+
+    .leaderboard td,
+    .leaderboard th {
+      border: 1px solid #0d0e14;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .leaderboard tr:nth-child(even) {
+      background-color: #19191c;
+    }
+
+    .leaderboard tr:nth-child(odd) {
+      background-color: #070707;
+    }
+
+    .leaderboard tr:first-child {
+      background-color: #1d2446;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="metadata">
+    <table class="leaderboard">
+      <th colspan="3">
+        <h2>Live Board</h2>
+
+      </th>
+      <tr>
+        <td>
+          <div><strong>Event Name:</strong> <span id="event-name"></span></div>
+        </td>
+        <td>
+          <div><strong>Heat Start Time:</strong> <span id="heat-start"></span></div>
+        </td>
+        <td>
+          <div><strong>Heat Status:</strong> <span id="heat-status"></span></div>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div><strong>Heat ID:</strong> <span id="heat-id"></span></div>
+        </td>
+
+        <td>
+          <div><strong>Heat End Time:</strong> <span id="heat-end"></span></div>
+        </td>
+        <td>
+          <div id="timer">Timer: 00:00:00</div>
+        </td>
+
+      </tr>
+
+
+    </table>
+  </div>
+
+  <table class="leaderboard" id="leaderboard-table">
+    <tr>
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Lane</th>
+      <th>Time</th>
+      <th>Swimmer ID</th>
+      <th>Swim Status</th>
+    </tr>
+  </table>
+
+  <script>
+    // Live Timer
+    let DQMsg = ["", "AB", "DQ", "DNC", "ES"]
+
+    let seconds = 0;
+    setInterval(() => {
+      seconds++;
+      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `Timer: ${hrs}:${mins}:${secs}`;
+    }, 1000);
+
+    // Fetch and update leaderboard every 2 seconds
+    async function updateLeaderboard() {
+      try {
+
+
+        // Extract dataUrl from query string
+        const params = new URLSearchParams(window.location.search);
+        const dataUrl = params.get('dataUrl');
+
+        // Use dataUrl in fetch
+        const response = await fetch(dataUrl);
+        //https://yourpage.com/leaderboard.html?dataUrl=https://eejo-managerdb-default-rtdb.firebaseio.com/Meets/Elite_TimeTrial_09_Jul_2025_Sr/LiveBoard.json
+
+        //https://eejo-managerdb-default-rtdb.firebaseio.com/Meets/Elite_TimeTrial_09_Jul_2025_Sr/LiveBoard.json
+        // const response = await fetch('https://eejo-managerdb-default-rtdb.firebaseio.com/Meets/Elite_TimeTrial_09_Jul_2025_Sr/LiveBoard.json'); // 🔁 Replace with your actual URL
+        const jsonData = await response.json();
+
+        // Update metadata
+        document.getElementById('event-name').textContent = jsonData.EventName || "(Not Provided)";
+        document.getElementById('heat-id').textContent = jsonData.HeatID;
+        document.getElementById('heat-start').textContent = jsonData.HeatStartTime;
+        document.getElementById('heat-end').textContent = jsonData.HeatEndTime;
+        document.getElementById('heat-status').textContent = jsonData.HeatStatus;
+
+        const swimmers = jsonData.BoardList;
+
+        // Separate valid and zero-time swimmers
+        const validSwimmers = swimmers.filter(s => s.SwimTimings > 0).sort((a, b) => a.SwimTimings - b.SwimTimings);
+        const zeroTimeSwimmers = swimmers.filter(s => s.SwimTimings === 0);
+
+        // Assign ranks
+        let currentRank = 1;
+        let previousTime = null;
+        validSwimmers.forEach((swimmer, index) => {
+          if (previousTime !== null && swimmer.SwimTimings !== previousTime) {
+            currentRank = index + 1;
+          }
+          swimmer.Rank = currentRank;
+          previousTime = swimmer.SwimTimings;
+        });
+
+        // Assign rank 0 to zero-time swimmers
+        zeroTimeSwimmers.forEach(swimmer => {
+          swimmer.Rank = 0;
+        });
+
+        // Combine and sort by BoardID
+        const rankedSwimmers = [...validSwimmers, ...zeroTimeSwimmers].sort((a, b) => a.BoardID - b.BoardID);
+
+        // Update table
+        const table = document.getElementById('leaderboard-table');
+        table.innerHTML = `
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Lane</th>
+          <th>Time</th>
+          <th>Swimmer ID</th>
+          <th>Swim Status</th>
+        </tr>
+      `;
+
+        rankedSwimmers.forEach(swimmer => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+          <td>${swimmer.Rank}</td>
+          <td>${swimmer.SwimerName}</td>
+          <td>L:${String(swimmer.BoardID + 1).padStart(2, '0')}</td>
+          <td>${swimmer.SwimTimings === 0 ? '00:00.000' : '00:' + swimmer.SwimTimings.toFixed(3)}</td>
+          <td>${swimmer.SwimerID}</td>
+          <td>${DQMsg[swimmer.SwimStatus]}</td>
+        `;
+          table.appendChild(row);
+        });
+
+      } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+      }
+    }
+
+    updateLeaderboard();
+    setInterval(updateLeaderboard, 2000);
+  </script>
+
+</body>
+
+</html>

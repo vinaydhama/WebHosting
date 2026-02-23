@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Swimming Championship Workflow</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/AdoptiveStyle.css">
+    <link rel="stylesheet" href="../css/FitForm.css">
+    <link rel="stylesheet" href="../css/Slider.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"
+        type="text/css" />
+
+
+
+    <script src="../js/script.js"></script>
+</head>
+<style>
+    /* body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    } */
+
+
+    /* .phase-block {
+        margin-bottom: 40px;
+    } */
+
+    .phase {
+        background: #09367a;
+        color: #fdfcfc;
+        padding: 12px;
+        font-weight: normal;
+        text-align: center;
+        border-radius: 8px;
+        font-size: 18px;
+        margin-bottom: 20px;
+        animation: slideIn 1s ease-in-out;
+    }
+
+    .phase img {
+        width: 450px;
+        height: 300px;
+
+        margin-bottom: 10px;
+        border-radius: 6px;
+    }
+
+    .steps {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .steps img {
+        width: 400px;
+        height: 300px;
+
+        margin-bottom: 10px;
+        border-radius: 6px;
+    }
+
+    .step {
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        width: 220px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: fadeIn 1.2s ease-in-out;
+    }
+
+    .step:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .step i {
+        font-size: 40px;
+        color: #09367a;
+        margin-bottom: 10px;
+        display: block;
+        animation: zoomIn 1.2s ease-in-out;
+    }
+
+    /* Placeholder for image styling */
+    .step img {
+        width: 280PX;
+        height: 200px;
+        max-width: 100px;
+        max-height: 100px;
+        margin-bottom: 10px;
+        border-radius: 6px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(-50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes zoomIn {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+</style>
+
+
+<header>
+    <!-- <div class="profile" onclick="">
+            <div class="dark-mode-toggle">
+                <img src="../images/profile.png" alt="Profile" id="UserPhoto" onclick="toggleProfilePopup()">
+                <div class="profile-popup" id="profilePopup">
+                    <label id="lblUserName"> </label>
+                    <a href="EditUser.html">Edit Profile</a>
+                    <a onclick="{ openPrintWindow('UserID',user,'EejoIDcardDisp','') }">Download ID</a>
+                    <a href="../index.html">Logout</a>
+                </div>
+            </div>
+        </div> -->
+    <div class="logo">
+        <!-- <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button> -->
+        <img src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
+        <h1 style="align-items:start; text-align: left; margin: 5%;">
+            <b> Eejo <br>
+                Swim Portal</b>
+        </h1>
+    </div>
+
+    <label aria-disabled="true" class="dark-mode-toggle" onclick="toggleDarkMode()"> 🌗 </label>
+
+</header>
+<!-- <div class="sidebar" id="sidebar">
+        <button onclick="location.href='Home.html'"> Home</button>
+        <button onclick="location.href='event_registration.html'"> Event Registration</button>
+        <button onclick="location.href='password_recovery.html'"> Password Recovery</button>
+        <button onclick="location.href='reports.html'"> Reports</button> <button
+            onclick="location.href='Eejo_Intro.html'"> Intro</button>
+    </div> -->
+
+<body>
+    <div class="container">
+
+        <h1 id="loginname">Welcome to Eejo Swim Manager</h1>
+        <div style="display: flex;">
+            <button onclick="manualSlide(-1)" style="background-color: transparent; width: 10px;; cursor:pointer;">
+                <i class="fa fa-toggle-left" style="font-size:48px;color: rgb(173, 237, 100);"></i>
+            </button>
+            <div class="carousel-container" id="carouselContainer">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="Slidcard">
+                        <p class="SlideP">
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Registration</h2>
+                                <img class="img" src="../images/User_Regestration.png">
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-desktop"></i>Participants access the
+                                    registration
+                                    portal.</div>
+                                <div class="step"><i class="fa-solid fa-id-card"></i>Fill in personal details (Name,
+                                    Contact, School/Club).</div>
+
+                                <div class="step"><i class="fa-solid fa-upload"></i>Select events and upload required
+                                    documents.</div>
+                                <div class="step"><i class="fa-solid fa-credit-card"></i>Complete payment and receive
+                                    confirmation.</div>
+                                <div class="step"><i class="fa-solid fa-qrcode"></i>Download registration form or QR
+                                    code
+                                    for check-in.</div>
+                            </div>
+                        </div>
+                        </p>
+                    </div>
+
+                    <div class="Slidcard">
+                        <p class="SlideP">
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Check-In</h2>
+                                <img class="img" src="../images/Checkin.jpg">
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-check"></i>Check in at the venue using card or
+                                    QR
+                                    code.</div>
+                                <div class="step"><i class="fa-solid fa-pencil"></i>Handle corrections if any.</div>
+                                <div class="step"><i class="fa-solid fa-list"></i>Swimmers receive heat details.</div>
+                                <div class="step"><i class="fa-solid fa-sync"></i>Heat list updated based on check-ins.
+                                </div>
+                            </div>
+                        </div>
+
+                        </p>
+                        <br>
+                    </div>
+
+                    <div class="Slidcard">
+
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Heat Execution</h2>
+                                <img class="img" src="../images/Heat.jpg">
+
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-users"></i>
+                                    </i>Swimmers arranged in heat order. </div>
+                                <div class="step"><i class="fa-solid fa-stopwatch"></i>Heat loaded and displayed on
+                                    timer
+                                    screen.</div>
+                                <div class="step"><i class="fa-solid fa-flag-checkered"></i>Referee starts the timer.
+                                </div>
+                                <div class="step"><i class="fa-solid fa-exclamation-triangle"></i>Referee applies
+                                    necessary
+                                    flags (DQ, AB,DNC).</div>
+                            </div>
+                        </div>
+                        </p>
+                    </div>
+
+                    <div class="Slidcard">
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Stop watch </h2>
+                                <img src="../images/Switch_Timer.jpg">
+
+
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-keyboard"></i>Timekeepers record finish times.
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Slidcard">
+
+
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Event Result Compilation </h2>
+                                <img src="../images/LiveSwitchResults.jpg">
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-star"></i>Final event results generated.</div>
+                                <div class="step"><i class="fa-solid fa-eye"></i>Tentative results displayed online.
+                                </div>
+                                <div class="step"><i class="fa-solid fa-comments"></i>Concerns reviewed and final
+                                    results
+                                    published.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Slidcard">
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Result display </h2>
+                                <img src="../images/LiveSwitchResults.jpg">
+
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-star"></i>System will have a in build Display.
+                                </div>
+                                <div class="step"><i class="fa-solid fa-star"></i>System will aslo Support's Big Display
+                                    Videowall's.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Slidcard">
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Results Stored in Cloud </h2>
+                                <img src="../images/Results upload.jpg">
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-star"></i>After Each Heat Result will be
+                                    automatically Stored in cloud *.</div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="Slidcard">
+
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Live Results </h2>
+                                <img src="../images/LiveResluts.jpg">
+
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-star"></i>Swimmers can get Live Results on Smart
+                                    device</div>
+                                <!-- <div class="step"><i class="fa-solid fa-eye"></i>Tentative results displayed online.</div>
+                  <div class="step"><i class="fa-solid fa-comments"></i>Concerns reviewed and final results published.</div> -->
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                    <div class="Slidcard">
+
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Championship Standings </h2>
+                                <img class="img" src="../images/Rank Trophy.jpg">
+
+
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-trophy"></i>IC results generated (Group-wise,
+                                    School-wise).</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="Slidcard">
+
+                        <div class="phase-block">
+                            <div class="phase">
+                                <h2> Print Certificates </h2>
+                                <img src="../images/Print_Certificates.jpg">
+
+                            </div>
+                            <div class="steps">
+                                <div class="step"><i class="fa-solid fa-star"></i>Live Printing of Certifiacates can be
+                                    done
+                                    after each Event.</div>
+                                <!-- <div class="step"><i class="fa-solid fa-eye"></i>Tentative results displayed online.</div>
+                  <div class="step"><i class="fa-solid fa-comments"></i>Concerns reviewed and final results published.</div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-buttons" style="display: flex; flex-direction: row;">
+
+                <button onclick="manualSlide(1)" style=" background-color: transparent; width: 10px; cursor:pointer;"><i class="fa fa-toggle-right"
+                        style="font-size:48px;color:  rgb(173, 237, 100);"></i></button>
+            </div>
+        </div>
+
+    </div>
+    <div class="indicators" id="indicators"></div>
+    <!-- </form> -->
+    <footer>
+        <p>&copy; 2025 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.002</p>
+    </footer>
+</body>
+
+<script>
+    // toggleSidebar();
+    // const myDiv = document.getElementById("sidebar");
+
+    // myDiv.addEventListener("click", function () {
+    //     myDiv.style.display = "none";
+    // });
+
+
+    // let user = ReadSessionData('user');
+    // if (user) {
+    //     document.getElementById("loginname").innerText = "Welcome to the Eejo Swim Portal " + user.name + ",";
+    //     UpdateProfilePage(user);
+    // }
+    const track = document.getElementById("carouselTrack");
+    const cards = document.querySelectorAll(".Slidcard");
+    const container = document.getElementById("carouselContainer");
+    const indicators = document.getElementById("indicators");
+
+    let currentIndex = 0;
+    let intervalId;
+
+    // Create dots
+    cards.forEach((_, i) => {
+        const dot = document.createElement("span");
+        dot.classList.add("dot");
+        if (i === 0) dot.classList.add("active");
+        indicators.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll(".dot");
+
+    function updateSlider() {
+        const cardWidth = cards[0].offsetWidth + 20;
+        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
+        dots.forEach(dot => dot.classList.remove("active"));
+        dots[currentIndex].classList.add("active");
+    }
+
+    function slideNext() {
+        currentIndex = (currentIndex + 1) % cards.length;
+        updateSlider();
+    }
+
+    function manualSlide(direction) {
+        currentIndex = (currentIndex + direction + cards.length) % cards.length;
+        updateSlider();
+        restartTimer();
+    }
+
+    function startTimer() {
+        intervalId = setInterval(slideNext, 5000);
+    }
+
+    function stopTimer() {
+        clearInterval(intervalId);
+    }
+
+    function restartTimer() {
+        stopTimer();
+        startTimer();
+    }
+
+    // Pause on hover
+    container.addEventListener("mouseenter", stopTimer);
+    container.addEventListener("mouseleave", startTimer);
+
+    // Start auto-slide
+    startTimer();
+
+</script>
+
+</html>

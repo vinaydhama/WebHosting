@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Centered Popup</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Overlay background */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none; /* Hidden by default */
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    /* Popup box */
+    .Msgpopup {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 90%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    /* Show overlay */
+    .overlay.show {
+      display: flex;
+    }
+
+    /* Button */
+    .Cancelbtn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+<body>
+
+  <button onclick="showPopup()">Show Popup</button>
+
+  <div class="overlay" id="popupOverlay">
+    <div class="Msgpopup">
+      <h2>Hello!</h2>
+      <p>This is a centered popup.</p>
+      <button class="Cancelbtn" onclick="hidePopup()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    function showPopup() {
+      document.getElementById('popupOverlay').classList.add('show');
+    }
+
+    function hidePopup() {
+      document.getElementById('popupOverlay').classList.remove('show');
+    }
+  </script>
+
+</body>
+</html>

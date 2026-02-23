@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Eejo Swim Portal</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/script.js" ></script>
+</head>
+<body>
+  <div class="top-banner">
+    <div class="logo">Eejo Swim Portal</div>
+    
+    <div class="profile" onclick="">
+      <div>
+      <img src="../images/profile.png" alt="Profile" id="UserPhoto" onclick="toggleProfilePopup()">
+    </div>
+    <label aria-disabled="true" class="dark-mode-toggle"  onclick="toggleDarkMode()"> 🌗</button>
+      
+
+      <div class="profile-popup" id="profilePopup">
+      <label  id="lblUserName"> </label>
+         <a href="EditUser.html">Edit Profile</a>
+          <a onclick="{ openPrintWindow('UserID',user,'EejoIDcardDisp','') }">Download ID</a>
+        <a href="../index.html">Logout</a>
+      </div>
+    </div>
+  </div>
+  <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+      <button onclick="location.href='Home.html'">🏠 Home</button>
+      <!-- <button onclick="location.href='../index.html'">🔐 Login</button> -->
+      <button onclick="location.href='registration.html'">📝 Registration</button>
+      <button onclick="location.href='event_registration.html'">📅 Event Registration</button>
+      <button onclick="location.href='password_recovery.html'">🔑 Password Recovery</button>
+      <button onclick="location.href='reports.html'">📊 Reports</button>
+    </div>
+    <div class="main-content">
+      <h1 id="Welcommsg">Welcome to Eejo Swim Portal</h1>
+      <a href="../html/Downloads.html">Downloads</a>
+
+      <p>This is the welcome to eejo swimming portal.</p>
+    </div>
+  </div>
+</body>
+<script>
+  // const userinfo = JSON.parse(sessionStorage.getItem("swimmerData"));
+  // if (userinfo)
+  //   {
+  // document.getElementById("lblUserName").innerText= userinfo.name
+  // document.getElementById("Welcommsg").innerText= "Welcome to Eejo Swim Portal " +  userinfo.name;
+  //   }
+  // if(user)
+  // {
+    ReadSessionData('user');
+     if (user)
+    {  
+  document.getElementById("Welcommsg").innerText= "Welcome to Eejo Swim Portal " +  user.name;
+    }
+    UpdateProfilePage(user);
+    // }
+
+</script>
+</html>

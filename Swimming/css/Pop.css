@@ -1,0 +1,64 @@
+/* body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+ */
+
+.multiline {
+  width: 300px;         /* Set a fixed width */
+  white-space: normal;  /* Allow wrapping */
+  word-wrap: break-word; /* Break long words if needed */
+}
+
+ 
+ /* Overlay background */
+ .overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: none; /* Hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+/* Popup box */
+.Msgpopup {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 40%;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+/* Show overlay */
+.overlay.show {
+  display: flex;
+}
+
+/* Button */
+.Cancelbtn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.EejoLogo {
+  position: relative;
+  margin: 5%;
+  top: 0%;
+  left: 0%;
+  width: 100px;
+  height: 100px;
+  background: rgba(7, 22, 232, 0.53);
+  border-radius: 20px;
+  animation: animate 2s linear infinite;
+}

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Print View — HMI Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --page-margin: 18mm;
+      --header-height: 20mm;
+      --footer-height: 16mm;
+      --sheet-width: 210mm; /* A4 */
+      --sheet-height: 297mm;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 14px/1.5 system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: #1d1d1f; }
+
+    /* Screen preview of one sheet */
+    @media screen {
+      body { background: #f5f7fa; }
+      .sheet {
+        width: var(--sheet-width);
+        min-height: var(--sheet-height);
+        margin: 1.2rem auto;
+        background: #fff;
+        padding:
+          calc(var(--page-margin) + var(--header-height))
+          var(--page-margin)
+          calc(var(--page-margin) + var(--footer-height));
+        box-shadow: 0 2px 18px rgba(0,0,0,.12);
+      }
+      header.site-header, footer.site-footer { position: sticky; background: #fff; z-index: 2; }
+      header.site-header { top: 0; }
+      footer.site-footer { bottom: 0; }
+    }
+
+    /* Print: paper, margins, repeating header/footer, page numbers */
+    @page {
+      size: A4 portrait;
+      margin:
+        calc(var(--page-margin) + var(--header-height))
+        var(--page-margin)
+        calc(var(--page-margin) + var(--footer-height));
+    }
+    @media print {
+      header.site-header, footer.site-footer {
+        position: fixed; left: 0; right: 0; color: #555; background: #fff;
+      }
+      header.site-header {
+        top: 0; height: var(--header-height);
+        padding: 6mm var(--page-margin); border-bottom: 1px solid #ddd;
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      footer.site-footer {
+        bottom: 0; height: var(--footer-height);
+        padding: 4mm var(--page-margin); border-top: 1px solid #ddd;
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      .page-number::after { content: "Page " counter(page) " of " counter(pages); }
+      h1, h2, h3, h4, h5, h6, p, pre, blockquote, table, ul, ol, figure, img { break-inside: avoid; }
+      p { orphans: 3; widows: 3; }
+      .no-print { display: none !important; }
+    }
+
+    header.site-header .title { font-weight: 600; }
+    header.site-header .meta, footer.site-footer .meta { font-size: 12px; color: #6b7280; }
+
+    table { width: 100%; border-collapse: collapse; margin: 10px 0 14px; }
+    th, td { border: 1px solid #d6d6d6; padding: 6px 8px; text-align: left; vertical-align: top; }
+    thead { background: #f3f4f6; }
+  </style>
+</head>
+<body>
+  <!-- Repeating Header -->
+  <header class="site-header" aria-hidden="true">
+    <div class="title" id="doc-title">Report</div>
+    <div class="meta">Prepared by HMI Team • <span id="print-date">—</span></div>
+  </header>
+
+  <!-- Screen preview sheet container -->
+  <div class="sheet">
+    <main class="content">
+      <h1 id="h1">Report</h1>
+
+      <table id="report-table">
+        <thead><tr id="table-head"></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </main>
+  </div>
+
+  <!-- Repeating Footer -->
+  <footer class="site-footer" aria-hidden="true">
+    <div class="meta">© Your Company</div>
+    <div class="meta page-number"></div>
+  </footer>
+
+  <script>
+    function setPrintDate() {
+      const el = document.getElementById('print-date');
+      if (!el) return;
+      const now = new Date();
+      el.textContent = now.toLocaleString([], { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    }
+
+    // Basic escaping to avoid accidental HTML injection in cells
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function renderTable(data) {
+      const { title, headers, rows } = data || {};
+      document.getElementById('doc-title').textContent = title || 'Report';
+      document.getElementById('h1').textContent      = title || 'Report';
+
+      const head = document.getElementById('table-head');
+      head.innerHTML = (headers || []).map(h => `<th>${escapeHtml(h)}</th>`).join('');
+
+      const body = document.getElementById('table-body');
+      body.innerHTML = (rows || []).map(row => {
+        return `<tr>${(headers || []).map(h => `<td>${escapeHtml(row[h] ?? '')}</td>`).join('')}</tr>`;
+      }).join('');
+    }
+
+    (function init() {
+      setPrintDate();
+
+      const params = new URLSearchParams(location.search);
+      const key = "PrintTable";
+
+      let data = null;
+      try {
+        if (key && sessionStorage.getItem(key)) {
+          data = JSON.parse(sessionStorage.getItem(key));
+          // Optional: clear after reading to avoid stale data if user reloads
+          sessionStorage.removeItem(key);
+        }
+      } catch (e) {
+        console.error('Failed to read/parse session data:', e);
+      }
+
+      if (!data) {
+        renderTable({
+          title: 'No data found',
+          headers: ['Message'],
+          rows: [{ 'Message': 'Open this page from the sender page so it can pass table data via sessionStorage.' }]
+        });
+      } else {
+        renderTable(data);
+      }
+
+      // Auto-open print dialog if requested
+      if (params.get('print') === '1') {
+        setTimeout(() => window.print(), 0);
+      }
+    })();
+
+    window.addEventListener('beforeprint', setPrintDate);
+  </script>
+</body>
+</html>

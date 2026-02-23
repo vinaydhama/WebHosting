@@ -1,0 +1,14 @@
+#preview {
+      width: 300px;
+      height: 300px;
+      border: 2px dashed #ccc;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #preview img {
+      max-width: 100%;
+    }

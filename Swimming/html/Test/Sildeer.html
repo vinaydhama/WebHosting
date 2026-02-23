@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Slider with Timer, Pause, and Indicators</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    .carousel-container {
+      width: 100%;
+      max-width: 800px;
+      overflow: hidden;
+      margin: auto;
+      position: relative;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .card {
+      min-width: 300px;
+      margin: 10px;
+      padding: 20px;
+      background: #f0f8ff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+
+    .carousel-buttons {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .indicators {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .dot {
+      height: 12px;
+      width: 12px;
+      margin: 0 5px;
+      background-color: #bbb;
+      border-radius: 50%;
+      display: inline-block;
+      transition: background-color 0.3s;
+    }
+
+    .dot.active {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Upcoming Swim Meets</h2>
+
+  <div class="carousel-container" id="carouselContainer">
+    <div class="carousel-track" id="carouselTrack">
+      <div class="card">🏊 Meet 1<br>Date: Sep 10<br>Location: Bangalore</div>
+      <div class="card">🏊 Meet 2<br>Date: Sep 20<br>Location: Mumbai</div>
+      <div class="card">🏊 Meet 3<br>Date: Oct 5<br>Location: Delhi</div>
+      <div class="card">🏊 Meet 4<br>Date: Oct 15<br>Location: Chennai</div>
+    </div>
+  </div>
+
+  <div class="carousel-buttons">
+    <button onclick="manualSlide(-1)">⬅️ Prev</button>
+    <button onclick="manualSlide(1)">Next ➡️</button>
+  </div>
+
+  <div class="indicators" id="indicators"></div>
+
+  <script>
+    const track = document.getElementById("carouselTrack");
+    const cards = document.querySelectorAll(".card");
+    const container = document.getElementById("carouselContainer");
+    const indicators = document.getElementById("indicators");
+
+    let currentIndex = 0;
+    let intervalId;
+
+    // Create dots
+    cards.forEach((_, i) => {
+      const dot = document.createElement("span");
+      dot.classList.add("dot");
+      if (i === 0) dot.classList.add("active");
+      indicators.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll(".dot");
+
+    function updateSlider() {
+      const cardWidth = cards[0].offsetWidth + 20;
+      track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
+      dots.forEach(dot => dot.classList.remove("active"));
+      dots[currentIndex].classList.add("active");
+    }
+
+    function slideNext() {
+      currentIndex = (currentIndex + 1) % cards.length;
+      updateSlider();
+    }
+
+    function manualSlide(direction) {
+      currentIndex = (currentIndex + direction + cards.length) % cards.length;
+      updateSlider();
+      restartTimer();
+    }
+
+    function startTimer() {
+      intervalId = setInterval(slideNext, 5000);
+    }
+
+    function stopTimer() {
+      clearInterval(intervalId);
+    }
+
+    function restartTimer() {
+      stopTimer();
+      startTimer();
+    }
+
+    // Pause on hover
+    container.addEventListener("mouseenter", stopTimer);
+    container.addEventListener("mouseleave", startTimer);
+
+    // Start auto-slide
+    startTimer();
+  </script>
+
+</body>
+</html>

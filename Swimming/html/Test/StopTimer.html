@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Same‑Page Timer Modal — Start / Stop / Reset / Record</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 24px; font: 14px/1.5 system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: #111; }
+    h1 { margin: 0 0 16px; font-size: 20px; }
+    label { display:block; font-weight:600; margin-bottom:6px; }
+    input[type="text"] {
+      width: 360px; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px;
+    }
+    .row { margin: 16px 0; display:flex; align-items:center; gap:12px; }
+    button {
+      padding: 10px 14px; border: 1px solid #1f2937; border-radius: 8px;
+      background: #111827; color:#fff; font-weight:600; cursor:pointer;
+    }
+    button.secondary { background:#374151; border-color:#374151; }
+    button.danger { background:#991b1b; border-color:#7f1d1d; }
+    button:hover { filter: brightness(1.05); }
+    .hint { color:#6b7280; font-size:12px; }
+
+    /* ---- Modal <dialog> styling ---- */
+    dialog#timerDialog {
+      border: none;
+      border-radius: 12px;
+      padding: 18px;
+      width: min(480px, 90vw);
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    dialog#timerDialog::backdrop {
+      background: rgba(0,0,0,.35);
+      backdrop-filter: blur(2px);
+    }
+    .dlg-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .dlg-title { font-size:18px; font-weight:700; margin:0; }
+    .close-btn {
+      background: transparent; color: inherit; border: 1px solid #cbd5e1; border-radius: 8px;
+      padding: 6px 10px; cursor: pointer;
+    }
+
+    .timer {
+      font: 700 34px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      text-align: center; letter-spacing: .5px;
+      padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; margin: 8px 0 14px;
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;
+    }
+    .kbd-hints { margin-top: 8px; color:#6b7280; font-size:12px; }
+  </style>
+</head>
+<body>
+  <h1>Timer Modal (Same Page)</h1>
+
+  <div class="row">
+    <label for="timeField">Captured Time</label>
+    <input id="timeField" type="text" placeholder="Recorded time will appear here…" />
+  </div>
+
+  <div class="row">
+    <!-- Point to the target input via data-target (CSS selector) -->
+    <button id="openTimer" data-target="#timeField">Open Timer</button>
+    <span class="hint">Shortcut inside dialog: <b>S</b>tart, S<b>t</b>op, <b>R</b>eset, <b>Enter</b> = Record</span>
+  </div>
+
+  <!-- ===== Modal (Timer) ===== -->
+  <dialog id="timerDialog" role="dialog" aria-modal="true" aria-labelledby="timerTitle">
+    <div class="dlg-header">
+      <h2 id="timerTitle" class="dlg-title">Timer</h2>
+      <button class="close-btn" type="button" id="closeTimer" aria-label="Close timer">Close</button>
+    </div>
+
+    <div id="display" class="timer" aria-live="polite" aria-atomic="true">00:00:00.00</div>
+
+    <div class="grid">
+      <button id="startBtn" class="secondary" type="button">Start</button>
+      <button id="stopBtn"  class="secondary" type="button" disabled>Stop</button>
+      <button id="resetBtn" class="danger"    type="button" disabled>Reset</button>
+      <button id="recordBtn"                 type="button">Record</button>
+    </div>
+
+    <div class="kbd-hints">Press <kbd>S</kbd>, <kbd>T</kbd>, <kbd>R</kbd>, or <kbd>Enter</kbd>. <em>Esc</em> closes the dialog.</div>
+  </dialog>
+
+  <script>
+    // Elements
+    const $open   = document.getElementById('openTimer');
+    const $dialog = document.getElementById('timerDialog');
+    const $close  = document.getElementById('closeTimer');
+
+    const $display = document.getElementById('display');
+    const $start   = document.getElementById('startBtn');
+    const $stop    = document.getElementById('stopBtn');
+    const $reset   = document.getElementById('resetBtn');
+    const $record  = document.getElementById('recordBtn');
+
+    // Timer state
+    let running = false;
+    let startTime = 0;   // performance.now() when started
+    let elapsed = 0;     // accumulated ms
+    let rafId = null;
+    let targetSelector = '#timeField';  // default target
+
+    // Helpers
+    const pad2 = (n) => String(n).padStart(2, '0');
+    function formatTime(ms) {
+      ms = Math.max(0, ms|0);
+      const cs = Math.floor((ms % 1000) / 10);  // 0..99
+      const totalSeconds = Math.floor(ms / 1000);
+      const s = totalSeconds % 60;
+      const m = Math.floor(totalSeconds / 60) % 60;
+      const h = Math.floor(totalSeconds / 3600);
+      return `${pad2(h)}:${pad2(m)}:${pad2(s)}.${pad2(cs)}`;
+    }
+    function updateDisplay() {
+      $display.textContent = formatTime(elapsed);
+    }
+    function tick() {
+      elapsed = performance.now() - startTime;
+      updateDisplay();
+      rafId = requestAnimationFrame(tick);
+    }
+    function start() {
+      if (running) return;
+      running = true;
+      startTime = performance.now() - elapsed; // resume
+      tick();
+      $start.disabled = true;
+      $stop.disabled  = false;
+      $reset.disabled = false;
+    }
+    function stop() {
+      if (!running) return;
+      running = false;
+      cancelAnimationFrame(rafId);
+      $start.disabled = false;
+      $stop.disabled  = true;
+      // keep reset enabled
+    }
+    function reset() {
+      stop();
+      elapsed = 0;
+      updateDisplay();
+      $reset.disabled = true;
+    }
+    function record() {
+      const value = formatTime(elapsed);
+      const input = document.querySelector(targetSelector);
+      if (!input) {
+        alert(`Could not find target field (${targetSelector}).`);
+        return;
+      }
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      // Keep dialog open so user can continue; close if you prefer:
+      // $dialog.close();
+    }
+
+    // Wire up buttons
+    $start.addEventListener('click', start);
+    $stop .addEventListener('click', stop);
+    $reset.addEventListener('click', reset);
+    $record.addEventListener('click', record);
+
+    // Keyboard shortcuts (active while dialog is open)
+    function onKeydown(e) {
+      if (!$dialog.open) return;
+      if (e.key === 's' || e.key === 'S') { e.preventDefault(); start(); }
+      else if (e.key === 't' || e.key === 'T') { e.preventDefault(); stop(); }
+      else if (e.key === 'r' || e.key === 'R') { e.preventDefault(); reset(); }
+      else if (e.key === 'Enter') { e.preventDefault(); record(); }
+    }
+    window.addEventListener('keydown', onKeydown);
+
+    // Open / close modal
+    $open.addEventListener('click', (e) => {
+      // get the target field selector from the button (defaults to #timeField)
+      targetSelector = e.currentTarget.getAttribute('data-target') || '#timeField';
+
+      // optional: prevent body scroll
+      document.documentElement.style.overflow = 'hidden';
+      $dialog.showModal();
+      // move focus to the first button for accessibility
+      $start.focus();
+    });
+
+    $close.addEventListener('click', () => {
+      // Stop the timer loop if running
+      stop();
+      $dialog.close();
+    });
+
+    // When dialog closes (via ESC or close()) — restore scroll & focus
+    $dialog.addEventListener('close', () => {
+      document.documentElement.style.overflow = '';
+      $open.focus();
+    });
+
+    // Init display once
+    updateDisplay();
+  </script>
+</body>
+</html>

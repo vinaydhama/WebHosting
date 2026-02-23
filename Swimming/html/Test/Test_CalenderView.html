@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .Table-container {
+      display: flex;
+      flex-direction: row;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    .event-card {
+      flex: 1;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .event-card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .event-card h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #333;
+    }
+
+    .event-card p {
+      margin: 5px 0;
+      color: #555;
+    }
+
+    .event-table {
+      flex: 1;
+      background-color: #fff;
+      border-radius: 8px;
+      overflow-y: auto;
+      max-height: 500px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+
+    tr {
+      border-left: 5px solid #003366;
+      background-color: #f9f9f9;
+      transition: background-color 0.3s ease;
+    }
+
+    tr:hover {
+      background-color: #e6f0ff;
+      cursor: pointer;
+    }
+
+    th {
+      background-color: #e0e0e0;
+    }
+
+    .date-cell {
+      display: flex;
+      flex-direction: column;
+      font-weight: bold;
+      color: #003366;
+    }
+
+    .days-left {
+      font-size: 12px;
+      color: #666;
+      font-weight: normal;
+    }
+  </style>
+</head>
+<body>
+
+<div class="Table-container">
+  <div class="event-card" id="eventCard">
+    <img id="eventImage" src="https://via.placeholder.com/600x200?text=Select+an+Event" alt="Event Image">
+    <h2 id="eventName">Select an Event</h2>
+    <p><strong>Date:</strong> <span id="eventDate">--</span></p>
+    <p><strong>Days Left:</strong> <span id="eventDays">--</span></p>
+    <p><strong>Location:</strong> <span id="eventLocation">--</span></p>    
+  </div>
+
+  <div class="event-table">
+    <table id="eventTable">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Name</th>
+          <!-- <th>Location</th>
+          <th>Type</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JS will populate rows -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const events = [
+  {
+      date: "2025-08-01",
+      name: "Railway 200's 'The Greatest Gathering'",
+      location: "Derby, UK",
+      type: "Open Days",
+      image: "https://via.placeholder.com/600x200?text=Railway+200",
+      description: "Celebrating 200 years of railway history at Alstom Derby."
+    },
+    {
+      date: "2025-08-01",
+      name: "Railway 200's 'The Greatest Gathering'",
+      location: "Derby, UK",
+      type: "Open Days",
+      image: "https://via.placeholder.com/600x200?text=Railway+200",
+      description: "Celebrating 200 years of railway history at Alstom Derby."
+    },
+    {
+      date: "2025-08-01",
+      name: "Railway 200's 'The Greatest Gathering'",
+      location: "Derby, UK",
+      type: "Open Days",
+      image: "https://via.placeholder.com/600x200?text=Railway+200",
+      description: "Celebrating 200 years of railway history at Alstom Derby."
+    },
+    
+
+    {
+      date: "2025-08-01",
+      name: "Railway 200's 'The Greatest Gathering'",
+      location: "Derby, UK",
+      type: "Open Days",
+      image: "https://via.placeholder.com/600x200?text=Railway+200",
+      description: "Celebrating 200 years of railway history at Alstom Derby."
+    },
+    {
+      date: "2025-09-02",
+      name: "9th Railway Forum 2025",
+      location: "Berlin, Germany",
+      type: "Exhibition",
+      image: "https://via.placeholder.com/600x200?text=Railway+Forum",
+      description: "Industry leaders gather to discuss railway innovations."
+    },
+    {
+      date: "2025-09-18",
+      name: "MetroTrans 2025",
+      location: "Qingdao, China",
+      type: "Conference/Exhibition",
+      image: "https://via.placeholder.com/600x200?text=MetroTrans",
+      description: "Exploring future of metro and urban transport systems."
+    },
+    {
+      date: "2025-11-13",
+      name: "FY 2025/26 - HalfYear results",
+      location: "Global",
+      type: "Financial results",
+      image: "https://via.placeholder.com/600x200?text=Financial+Results",
+      description: "Alstom's financial performance update for H1."
+    }
+  ];
+
+  const tbody = document.querySelector("#eventTable tbody");
+  const today = new Date();
+
+  events.forEach(event => {
+    const eventDate = new Date(event.date);
+    const daysLeft = Math.ceil((eventDate - today) / (1000 * 60 * 60 * 24));
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>
+        <div class="date-cell">
+          ${eventDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+          <span class="days-left">${daysLeft} days</span>
+        </div>
+      </td>
+      <td>${event.name}</td>
+
+    `;
+
+    // <td>${event.location}</td>
+    //   <td>${event.type}</td>
+    row.onclick = () => showCard(event, daysLeft);
+    tbody.appendChild(row);
+  });
+
+  function showCard(event, daysLeft) {
+    document.getElementById("eventImage").src = event.image;
+    document.getElementById("eventName").textContent = event.name;
+    document.getElementById("eventDate").textContent = new Date(event.date).toDateString();
+    document.getElementById("eventDays").textContent = `${daysLeft} days`;
+    document.getElementById("eventLocation").textContent = event.location;
+    document.getElementById("eventType").textContent = event.type;
+    document.getElementById("eventDescription").textContent = event.description;
+  }
+</script>
+
+</body>
+</html>

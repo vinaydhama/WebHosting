@@ -1,0 +1,81 @@
+<html>
+<script src="../js/IDHelper.js"></script>
+<script src="../js/script.js"></script>
+<script src="../js/Utility.js"></script>
+
+
+<link rel="stylesheet" href="../css/Idcard.css">
+<link rel="stylesheet" href="../css/FitForm.css">
+
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+
+<img id="logo" src="../images/eejo_BW.png" style="display:none;" />
+
+<button style="margin: auto;" onclick="DownloadIDcard(cardHolder,ImageHolder,(name +'_Eejo'))">Download Eejo ID</button>
+
+
+<div id="EejoIDcardDisp" class="id-card"
+  style="margin: auto; display: none; color: black; background-color: rgb(219, 215, 247);">
+  <img id="EProfileImg" src="../images/profile.png" alt="User Photo" class="photo" crossorigin="anonymous"> 
+
+  <img src="https://res.cloudinary.com/codelife/image/upload/v1621712847/octocat" alt="Sample Image">
+  <h2 id="Ename">Vinay C.R.</h2>
+  <p><strong>ID:</strong> <span id="Eid">EJ123456</span></p>
+  <p><strong>DOB:</strong> <span id="Edob">2005-08-17</span></p>
+  <p><strong>Gender:</strong> <span id="Egender">Male</span></p>
+  <p><strong>Mobile:</strong> <span id="Emobile">+1234567890</span></p>
+  <p><strong>Club:</strong> <span id="Eclub">Eejo Swim sdsdsdsdsssdClub</span></p>
+  <p><strong>School:</strong> <span id="Eschool">Springfieldasasasasasa sasasasasa High</span></p>
+  <canvas id="EejoQRCodeDisp" alt="QR Code" class="qr">
+  </canvas>
+</div>
+
+<div id="EventIDcardDisp" class="id-card"
+  style=" height:800px ; display: none; color: black; background-color: rgb(219, 215, 247);">
+  <img id="ProfileImg" src="../images/profile.png" alt="User Photo" class="photo" crossorigin="anonymous" >
+  <h2 id="name">Vinay C.R.</h2>
+  <p><strong>ID:</strong> <span id="id">EJ123456</span></p>
+  <p><strong>DOB:</strong> <span id="dob">2005-08-17</span></p>
+  <p><strong>Club:</strong> <span id="club">Eejo Swim sdsdsdsdsssdClub</span></p>
+  <p><strong>School:</strong> <span id="school">Springfieldasasasasasa sasasasasa High</span></p>
+  <p><strong>Event Name:</strong> <span id="Eventname">Springfieldasasasasasa sasasasasa High</span></p>
+  <p><strong>Event Date:</strong> <span id="EventDate">Springfieldasasasasasa sasasasasa High</span></p>
+  <p><strong>Event Address:</strong> <span id="EventAddress">Springfieldasasasasasa sasasasasa High</span>
+  </p>
+  <p><strong>RegTime:</strong> <span id="RegTime"></span></p>
+
+  <canvas id="EventQRCodeDisp" src="qr-code.png" alt="QR Code" class="qr"></canvas>
+  <canvas id="EventLocationQRCodeDisp" src="qr-code.png" alt="QR Code" class="qr"></canvas>
+
+</div>
+
+<script>
+  let cardHolder = "";
+  let name = "www"
+  const params = new URLSearchParams(window.location.search);
+  const IDType = params.get("IDType");
+  const user = ReadSessionData('user');
+  name = user.name;
+  const ParentContainer = params.get("ParentDev");
+  const datatopost = ReadSessionData("datatopost");
+
+  if (IDType == "UserID") {
+    cardHolder = "EejoIDcardDisp";
+    ImageHolder="ProfileImg";
+
+    UpdateUserDetailsID(user, ParentContainer);
+  }
+  else if (IDType == "EventID") {
+    cardHolder = "EventIDcardDisp";
+    ImageHolder= "EProfileImg";
+
+    UpdateEventID(user, datatopost, ParentContainer);
+  }
+
+
+</script>
+
+</html>

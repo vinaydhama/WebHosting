@@ -1,0 +1,111 @@
+<!doctype html>
+<script src="../js/GraphVisuliser.js"></script>
+<script src="../js/PagePrinter.js"></script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+
+
+<link rel="stylesheet" href="../css/PageLayout.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Print View — Eejo Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <button class="print-btn"  onclick="{setTimeout(() => window.print(), 0);}"><i class='fas fa-print'></i>print</button>
+
+
+</head>
+<body>
+  <header class="site-header" aria-hidden="true">
+    <div class="title" id="doc-title">Report</div>
+    <div class="meta">By Eejo Analyzer • <span id="print-date">—</span></div>
+  </header>
+  
+  <div class="sheet">
+    <main class="content">
+      <h1 id="h1">Swimmer Performance Report</h1>
+
+      <table id="performanceTable">
+        <thead><tr id="table-head"></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
+<div class="page-break-before">
+      <div id="chartVis"></div>
+    </div>
+    </main>
+  </div>
+
+  <footer class="site-footer" aria-hidden="true">
+    <div class="meta">© TinyTechniques</div>
+    <div class="meta">By Eejo Analyze • <span id="print-date">—</span></div>
+
+    <!-- <div class="meta page-number"></div> -->
+  </footer>
+
+  <script>
+    function setPrintDate() {
+      const el = document.getElementById('print-date');
+      if (!el) return;
+      const now = new Date();
+      el.textContent = now.toLocaleString([], { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    }
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function renderTable(data) {
+      const { title, headers, rows } = data || {};
+      document.getElementById('doc-title').textContent = title || 'Report';
+      document.getElementById('h1').textContent = title || 'Report';
+
+      const head = document.getElementById('table-head');
+      head.innerHTML = (headers || []).map(h => `<th>${escapeHtml(h)}</th>`).join('');
+
+      const body = document.getElementById('table-body');
+      body.innerHTML = (rows || []).map(row => {
+        return `<tr>${(headers || []).map(h => `<td>${escapeHtml(row[h] ?? '')}</td>`).join('')}</tr>`;
+      }).join('');
+    }
+
+    // Load data
+    (function init() {
+      setPrintDate();
+      const params = new URLSearchParams(location.search);
+      const key = "PrintTable";
+      let data = null;
+      try {
+        if (key && sessionStorage.getItem(key)) {
+          data = JSON.parse(sessionStorage.getItem(key));
+        } else if (key && localStorage.getItem(key)) {
+          data = JSON.parse(localStorage.getItem(key));
+        }
+      } catch (e) {
+        console.error('Failed to parse data:', e);
+      }
+
+      if (!data) {
+        // Friendly fallback if no data found
+        renderTable({
+          title: 'No data found',
+          headers: ['Message'],
+          rows: [{ 'Message': 'Open this page from the sender (index.html) to pass table data.' }]
+        });
+      } else {
+        renderTable(data);
+        plotVisualiser();
+      }
+
+      if (params.get('print') === '1') {
+        setTimeout(() => window.print(), 0);
+      }
+    })();
+
+    window.addEventListener('beforeprint', setPrintDate);
+
+    // setTimeout(() => window.print(), 0);
+  </script>
+</body>
+</html>

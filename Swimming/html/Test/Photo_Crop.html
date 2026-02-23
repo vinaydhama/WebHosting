@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Photo Crop & Upload</title>
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    #preview {
+      width: 300px;
+      height: 300px;
+      border: 2px dashed #ccc;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #preview img {
+      max-width: 100%;
+    }
+
+    .controls {
+      margin-top: 10px;
+    }
+
+    button {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Select and Crop Your Photo</h2>
+
+<input type="file" id="inputImage" accept="image/*" />
+<div id="preview">
+  <img id="image" style="display:none;" />
+</div>
+
+<div class="controls">
+  <button onclick="cropImage()">Crop & Upload</button>
+  <button onclick="resetCrop()">Reset</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
+<script>
+  let cropper;
+  const inputImage = document.getElementById('inputImage');
+  const image = document.getElementById('image');
+
+  inputImage.addEventListener('change', function (e) {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        image.src = event.target.result;
+        image.style.display = 'block';
+
+        if (cropper) {
+          cropper.destroy();
+        }
+
+        cropper = new Cropper(image, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 1,
+          responsive: true,
+        });
+      };
+      reader.readAsDataURL(files[0]);
+    }
+  });
+
+  function cropImage() {
+    if (cropper) {
+      const canvas = cropper.getCroppedCanvas({
+        width: 300,
+        height: 300,
+      });
+
+      // Simulate upload
+      canvas.toBlob(blob => {
+        const formData = new FormData();
+        formData.append('croppedImage', blob);
+
+        // Simulated upload
+        console.log("Simulated upload of cropped image:", formData.get('croppedImage'));
+        alert('Image cropped and ready for upload!');
+      });
+    }
+  }
+
+  function resetCrop() {
+    if (cropper) {
+      cropper.reset();
+    }
+  }
+</script>
+
+</body>
+</html>

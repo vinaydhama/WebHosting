@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Eejo Login Page</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- <link rel="stylesheet" href="css/GeneralStyle.css"> -->
+  <link rel="stylesheet" href="css/AdoptiveStyle.css">
+  <link rel="stylesheet" href="css/FitForm.css">
+  <link rel="stylesheet" href="css/Slider.css">
+  <link rel="stylesheet" href="css/Pop.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script src="js/script.js" defer></script>
+  <script src="js/Pop.js" defer></script>
+  <script type="module" src="js/Login.js" defer></script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">      
+      <img  src="images/eejo_max.png" style="height:100px; margin-top: 0px;">
+      <h1 style="align-items:start; text-align: left; margin: 5%;">
+        <b> Eejo <br>
+          Swim Portal</b>
+      </h1>
+    </div>
+  <label aria-disabled="true" class="dark-mode-toggle" onclick="toggleDarkMode()"> 🌗 </label>
+
+  </header>
+
+  <div class="container">
+    <!-- <div class="grid">
+      <div class="card"> -->
+    <h1>Swimmer Login</h1>
+    <!-- <div class="Contentleft" style="width: 100PX;"> -->
+    <h3>Hello, Welcome to Eejo Swimmer portal, please login to continue </h3>
+    <!-- </div> -->
+    <form id="loginForm" onsubmit="loginUser(event)">
+      <label>Swimmer ID:
+        <input type="text" id="swimmerID" required>
+      </label>
+      <label>Password:
+        <input type="password" id="password" required>
+      </label>
+      <button type="submit">Login</button>
+      <button  type="button" onclick="location.href='html/registration.html'">New User</button>
+      <button   type="button" onclick="location.href='html/password_recovery.html'">Forgot Password</button>
+    </form>
+  </div>
+  <footer>
+    <p>&copy; 2025 <a href="www.g.com">Tiny Techniques</a>  v 1.0.002</p>
+  </footer>
+
+  <div class="overlay" id="overlaypop" >
+    <div class="Msgpopup" id="ActivityPop">
+      <img id="Ejogo" style="margin: 20%;" class="EejoLogo" src="images/eejo_max.png" alt="WWW.TinyTechniques.com">
+      <i class="fa fa-circle-o-notch fa-spin" style=" font-size: 64px;color: cornflowerblue;"></i>        
+      <h4 id="BusyPopMsg"><b> </b></h1>
+    </div>
+
+    <div class="Msgpopup" id="MessagePop">
+      <h1 style="column-fill: auto; color: white; background-color: rgb(22, 1, 211); text-align: justify;">Eejo portal </h1>
+      <p class="SlideP" id="popupMessage"></p>
+      <button class="Cancelbtn" onclick="ClearAllPop()">Close</button>
+    </div>
+  </div>
+
+</body>
+<script> 
+</script>
+
+</html>  
