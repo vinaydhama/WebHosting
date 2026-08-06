@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meet Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .sidebar {
+      width: 300px;
+      background: #2a2a2a;
+      border-right: 1px solid #444;
+      overflow-y: auto;
+      padding: 12px;
+    }
+    .sidebar h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .file-list {
+      list-style: none;
+    }
+    .file-item {
+      padding: 10px;
+      margin-bottom: 6px;
+      background: #3a3a3a;
+      border: 1px solid #444;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      word-break: break-word;
+    }
+    .file-item:hover {
+      background: #4a4a4a;
+      border-color: #666;
+    }
+    .file-item.active {
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+    .file-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .file-title {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    .file-desc {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+    .file-status {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .toolbar {
+      background: #2a2a2a;
+      border-bottom: 1px solid #444;
+      padding: 12px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .toolbar button {
+      padding: 8px 12px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .toolbar button:hover {
+      background: #1d4ed8;
+    }
+    .toolbar button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .toolbar input {
+      padding: 6px 8px;
+      background: #3a3a3a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      width: 60px;
+    }
+    .search-box {
+      padding: 6px 8px;
+      background: #3a3a3a;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      flex: 0.3;
+      min-width: 150px;
+    }
+    .toolbar span {
+      font-size: 14px;
+      color: #aaa;
+    }
+    .pdf-container {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 12px;
+      background: #1a1a1a;
+      position: relative;
+    }
+    #pdfCanvas {
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      border-radius: 4px;
+      position: relative;
+    }
+    .pdf-canvas-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto;
+    }
+    .highlight-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
+    .highlight-box {
+      position: absolute;
+      background-color: rgba(255, 255, 0, 0.4);
+      border: 2px solid #ffff00;
+      box-sizing: border-box;
+      animation: pulse 0.6s ease-in-out;
+    }
+    .highlight-box.current {
+      background-color: rgba(255, 100, 0, 0.6);
+      border: 2px solid #ff6400;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .loading {
+      text-align: center;
+      color: #aaa;
+      padding: 20px;
+    }
+    .error {
+      background: #7f1d1d;
+      color: #fca5a5;
+      padding: 12px;
+      border-radius: 4px;
+      margin: 12px;
+    }
+    .search-info {
+      font-size: 12px;
+      color: #aaa;
+      margin-left: 8px;
+    }
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #444;
+        order: 2;
+      }
+      .main {
+        order: 1;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar input,
+      .search-box {
+        width: 100%;
+      }
+    }
+  </style>
+  <header>
+    <div class="logo">
+      <img src="../Documents/MileniumHassan/Organisers_Logo.png" style="height:100px; margin-top: 0px;">
+      <br>
+      <h1 style="align-items:start; text-align: left; margin: 5%;">
+        <b> Eejo <br>
+          Swim Portal</b><br>
+          Event Result
+      </h1>
+      <br>
+      <img src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
+      
+
+    </div> 
+  </header>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Results</h2>
+    <ul id="fileList" class="file-list"></ul>
+  </aside>
+  <main class="main">
+    <div class="toolbar">
+      <button id="prevBtn" type="button">← Previous</button>
+      <button id="nextBtn" type="button">Next →</button>
+      <input id="pageInput" type="number" min="1" value="1">
+      <span id="pageInfo">of 0</span>
+      <button id="zoomInBtn" type="button">Zoom +</button>
+      <button id="zoomOutBtn" type="button">Zoom −</button>
+      <input id="searchBox" class="search-box" type="text" placeholder="Search text in PDF...">
+      <button id="searchPrevBtn" type="button" title="Previous match">⬆ Prev</button>
+      <button id="searchNextBtn" type="button" title="Next match">⬇ Next</button>
+      <span id="searchInfo" class="search-info"></span>
+      <span id="fileName" style="flex: 1; text-align: right; font-size: 14px; color: #aaa;"></span>
+    </div>
+    <div class="pdf-container">
+      <div id="loadingMsg" class="loading" style="display:none;">Loading PDF...</div>
+      <div class="pdf-canvas-wrapper">
+        <div id="highlightLayer" class="highlight-layer"></div>
+        <canvas id="pdfCanvas"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const fileList = document.getElementById('fileList');
+    const canvas = document.getElementById('pdfCanvas');
+    const ctx = canvas.getContext('2d');
+    const pageInput = document.getElementById('pageInput');
+    const pageInfo = document.getElementById('pageInfo');
+    const fileName = document.getElementById('fileName');
+    const loadingMsg = document.getElementById('loadingMsg');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const zoomInBtn = document.getElementById('zoomInBtn');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const searchBox = document.getElementById('searchBox');
+    const searchPrevBtn = document.getElementById('searchPrevBtn');
+    const searchNextBtn = document.getElementById('searchNextBtn');
+    const searchInfo = document.getElementById('searchInfo');
+    const highlightLayer = document.getElementById('highlightLayer');
+
+    let pdfDoc = null;
+    let currentPage = 1;
+    let scale = 1.5;
+    let files = [];
+    let selectedFile = null;
+    let searchMatches = [];
+    let currentSearchMatchIndex = -1;
+    let pageTextContent = null;
+
+    const indexFile = '../Documents/MileniumHassan/Index.json';
+
+    async function loadIndex() {
+      try {
+        const res = await fetch(indexFile);
+        if (!res.ok) throw new Error('Index.json not found');
+        const data = await res.json();
+        files = (data.files || []).filter(f => f.Display === 'True' || f.Display === true);
+        renderFileList();
+      } catch (err) {
+        showError('Failed to load document index: ' + err.message);
+      }
+    }
+
+    function renderFileList() {
+      fileList.innerHTML = '';
+      files.forEach((file, idx) => {
+        const li = document.createElement('li');
+        li.className = 'file-item';
+        li.innerHTML = `
+          <div class="file-title">${escapeHtml(file.DisplayName)}</div>
+          <div class="file-desc">${escapeHtml(file.Description)}</div>
+          <div class="file-status">Status: ${escapeHtml(file.status)}</div>
+        `;
+        li.addEventListener('click', () => openFile(file, idx));
+        fileList.appendChild(li);
+      });
+    }
+
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
+    async function openFile(file, idx) {
+      try {
+        selectedFile = file;
+        currentPage = 1;
+        scale = 1.5;
+        searchMatches = [];
+        currentSearchMatchIndex = -1;
+        searchBox.value = '';
+        searchInfo.textContent = '';
+
+        document.querySelectorAll('.file-item').forEach((el, i) => {
+          el.classList.toggle('active', i === idx);
+        });
+
+        loadingMsg.style.display = 'block';
+        canvas.style.display = 'none';
+        fileName.textContent = file.DisplayName;
+
+        pdfDoc = await pdfjsLib.getDocument(file.path).promise;
+        pageInfo.textContent = 'of ' + pdfDoc.numPages;
+        await renderPage(1);
+      } catch (err) {
+        showError('Failed to load document: ' + err.message);
+      } finally {
+        loadingMsg.style.display = 'none';
+      }
+    }
+
+    async function renderPage(pageNum) {
+      if (!pdfDoc || pageNum < 1 || pageNum > pdfDoc.numPages) return;
+      currentPage = pageNum;
+      pageInput.value = pageNum;
+
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // Set wrapper dimensions to match canvas
+        const wrapper = document.querySelector('.pdf-canvas-wrapper');
+        wrapper.style.width = canvas.width + 'px';
+        wrapper.style.height = canvas.height + 'px';
+
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        
+        // Get text content for highlighting
+        pageTextContent = await page.getTextContent();
+        
+        canvas.style.display = 'block';
+        
+        // Draw highlights if search is active
+        if (searchBox.value.trim()) {
+          drawHighlights();
+        }
+      } catch (err) {
+        showError('Failed to render page: ' + err.message);
+      }
+    }
+
+    function drawHighlights() {
+      highlightLayer.innerHTML = '';
+      
+      if (!pageTextContent) return;
+
+      const searchTerm = searchBox.value.toLowerCase();
+      const items = pageTextContent.items;
+
+      items.forEach((item, idx) => {
+        if (!item.str) return;
+        const itemText = item.str.toLowerCase();
+        
+        if (itemText.includes(searchTerm)) {
+          const box = document.createElement('div');
+          box.className = 'highlight-box';
+          
+          // Check if this is the current match
+          if (searchMatches[currentSearchMatchIndex] && 
+              searchMatches[currentSearchMatchIndex].page === currentPage &&
+              searchMatches[currentSearchMatchIndex].itemIndex === idx) {
+            box.classList.add('current');
+          }
+          
+          // Simpler coordinate calculation
+          const x = item.transform[4];
+          const y = item.transform[5];
+          const width = item.width;
+          const height = item.height;
+          
+          box.style.left = (x * scale) + 'px';
+          box.style.top = (y * scale) + 'px';
+          box.style.width = (width * scale) + 'px';
+          box.style.height = (height * scale) + 'px';
+          
+          highlightLayer.appendChild(box);
+        }
+      });
+    }
+
+    async function searchPDF(query) {
+      if (!pdfDoc || !query.trim()) {
+        searchMatches = [];
+        currentSearchMatchIndex = -1;
+        searchInfo.textContent = '';
+        highlightLayer.innerHTML = '';
+        return;
+      }
+
+      searchMatches = [];
+      const searchTerm = query.toLowerCase();
+
+      for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+        try {
+          const page = await pdfDoc.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          const items = textContent.items;
+
+          items.forEach((item, idx) => {
+            if (!item.str) return;
+            const itemText = item.str.toLowerCase();
+            if (itemText.includes(searchTerm)) {
+              searchMatches.push({ page: pageNum, itemIndex: idx, text: item.str });
+            }
+          });
+        } catch (e) {
+          console.error(`Error searching page ${pageNum}:`, e);
+        }
+      }
+
+      if (searchMatches.length > 0) {
+        currentSearchMatchIndex = 0;
+        await goToMatch(0);
+      } else {
+        searchInfo.textContent = 'No matches found';
+        highlightLayer.innerHTML = '';
+      }
+    }
+
+    async function goToMatch(matchIndex) {
+      if (matchIndex < 0 || matchIndex >= searchMatches.length) return;
+      currentSearchMatchIndex = matchIndex;
+      const match = searchMatches[matchIndex];
+      searchInfo.textContent = `Match ${matchIndex + 1} of ${searchMatches.length}`;
+      await renderPage(match.page);
+    }
+
+    function showError(msg) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error';
+      errorDiv.textContent = msg;
+      document.querySelector('.main').insertBefore(errorDiv, document.querySelector('.pdf-container'));
+      setTimeout(() => errorDiv.remove(), 5000);
+    }
+
+    prevBtn.addEventListener('click', () => renderPage(currentPage - 1));
+    nextBtn.addEventListener('click', () => renderPage(currentPage + 1));
+    zoomInBtn.addEventListener('click', () => {
+      scale += 0.25;
+      renderPage(currentPage);
+    });
+    zoomOutBtn.addEventListener('click', () => {
+      if (scale > 0.5) scale -= 0.25;
+      renderPage(currentPage);
+    });
+    pageInput.addEventListener('change', () => {
+      const pageNum = parseInt(pageInput.value, 10);
+      if (!isNaN(pageNum)) renderPage(pageNum);
+    });
+    searchBox.addEventListener('input', (e) => searchPDF(e.target.value));
+    searchPrevBtn.addEventListener('click', () => {
+      if (searchMatches.length > 0) {
+        const prevIdx = (currentSearchMatchIndex - 1 + searchMatches.length) % searchMatches.length;
+        goToMatch(prevIdx);
+      }
+    });
+    searchNextBtn.addEventListener('click', () => {
+      if (searchMatches.length > 0) {
+        const nextIdx = (currentSearchMatchIndex + 1) % searchMatches.length;
+        goToMatch(nextIdx);
+      }
+    });
+
+    loadIndex();
+  </script>
+</body>
+</html>

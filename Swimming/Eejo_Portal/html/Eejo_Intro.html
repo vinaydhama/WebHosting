@@ -154,29 +154,43 @@
 
 
 <header>
-    <!-- <div class="profile" onclick="">
-            <div class="dark-mode-toggle">
-                <img src="../images/profile.png" alt="Profile" id="UserPhoto" onclick="toggleProfilePopup()">
-                <div class="profile-popup" id="profilePopup">
-                    <label id="lblUserName"> </label>
-                    <a href="EditUser.html">Edit Profile</a>
-                    <a onclick="{ openPrintWindow('UserID',user,'EejoIDcardDisp','') }">Download ID</a>
-                    <a href="../index.html">Logout</a>
-                </div>
-            </div>
-        </div> -->
+   
+    <div class="profile" onclick="">
+      <div class="dark-mode-toggle">
+
+        <img src="../images/profile.png" alt="Profile" id="UserPhoto" onclick="toggleProfilePopup()">
+        <div class="profile-popup" id="profilePopup">
+          <label id="lblUserName"> </label>
+          <a href="EditUser.html">Edit Profile</a>
+          <a onclick="{ openPrintWindow('UserID',user,'EejoIDcardDisp','') }">Download ID</a>
+          <a href="../index.html">Logout</a>
+        </div>
+      </div>
+    </div>
     <div class="logo">
-        <!-- <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button> -->
-        <img src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
-        <h1 style="align-items:start; text-align: left; margin: 5%;">
-            <b> Eejo <br>
-                Swim Portal</b>
-        </h1>
+      <button class="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+      <img src="../images/eejo_max.png" style="height:100px; margin-top: 0px;">
+      <h1 style="align-items:start; text-align: left; margin: 5%;">
+        <b> Eejo <br>
+          Swim Portal</b> 
+      </h1>
     </div>
 
     <label aria-disabled="true" class="dark-mode-toggle" onclick="toggleDarkMode()"> 🌗 </label>
 
+  
+
 </header>
+  <div class="sidebar" id="sidebar">
+    <button onclick="location.href='Home.html'"> Home</button>
+    <button onclick="location.href='event_registration.html'"> Event Registration</button>
+    <button onclick="location.href='password_recovery.html'"> Password Recovery</button>
+    <button onclick="location.href='reports.html'"> Reports</button>  
+      <button onclick="location.href='Eejo_Intro.html'"> Intro</button>  
+
+    
+  </div>
+  
 <!-- <div class="sidebar" id="sidebar">
         <button onclick="location.href='Home.html'"> Home</button>
         <button onclick="location.href='event_registration.html'"> Event Registration</button>
@@ -399,7 +413,7 @@
     <div class="indicators" id="indicators"></div>
     <!-- </form> -->
     <footer>
-        <p>&copy; 2025 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.002</p>
+        <p>&copy; 2026 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.003</p>
     </footer>
 </body>
 

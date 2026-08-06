@@ -1,0 +1,18 @@
+{
+    "files": [
+        {
+        "DisplayName": "Event 1",
+        "Description": "50M Freestyle Boys Group1",
+        "path": "..\\Documents\\MileniumHassan\\test1.pdf",
+        "status": "Final",
+        "Display": "True"
+        },
+        {
+        "DisplayName": "Event 2",
+        "Description": "50M Freestyle Boys Group2",
+        "path": "..\\Documents\\MileniumHassan\\test2.pdf",
+        "status": "Final",
+        "Display": "True"
+        }
+    ]
+    }

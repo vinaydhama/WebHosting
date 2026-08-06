@@ -69,7 +69,8 @@
         <p><strong>Location:</strong> <span id="eventLocation">--</span></p>
         <p><strong>No. of Events:</strong> <span id="eventType">--</span></p>
         <p><strong>Description:</strong> <span id="eventDescription">--</span></p>
-        <button onclick="DisplayMeetRegister(event)" id="registerBtn" style="display:none;">Events</button>
+        <p id="entryStatus" style="color:#a00; font-weight:600; display:none; margin-top:6px;"></p>
+        <button onclick="DisplayMeetRegister(event)"  style="display: inline-block;">Events</button>
       </div>
 
       <div class="event-table" style="height:150px; overflow-y:auto;">
@@ -88,12 +89,12 @@
 
     <p id="eligibilityResult"></p>
 
-    <form id="frmEvet" style="display:none;">
-      <button type="submit">Register</button>
+    <form id="frmEvet" style="display: none;">
+      <button id="registerBtn" type="submit">Register</button>
     </form>
   </div>
   <footer>
-    <p>&copy; 2025 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.002</p>
+    <p>&copy; 2026 <a href="../html/TinyTechniques/TinyTechniques.html">Tiny Techniques</a> v 1.0.003</p>
   </footer>
 
   <div class="Msgpopup" id="MessagePop">

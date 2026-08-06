@@ -1,5 +1,5 @@
-MeetDataFirebaseBaseURL = "https://eejo-managerdb-default-rtdb.firebaseio.com/Meets/";
-MeetRegInfoFBURL = "https://eejo-managerdb-default-rtdb.firebaseio.com/Meets/MeetRegInfo.json";
+MeetDataFirebaseBaseURL = "https://riviera-certificates-test-default-rtdb.firebaseio.com/Eejo/Events/";
+MeetRegInfoFBURL = "https://riviera-certificates-test-default-rtdb.firebaseio.com/Eejo/MeetRegInfo.json";
 let MeetName = "";
 let MeetAddress = "";
 let MeetDate = "";
@@ -19,7 +19,7 @@ async function DisplayMeetRegister(event) {
     })
     .then(data => {
       ElegableGroup = CheckGroup(user.dob, data);
-      ListApplicableEvents(ElegableGroup, data);
+      ListApplicableEvents(user,ElegableGroup, data);
       document.getElementById("frmEvet").scrollIntoView({ behavior: "smooth" });
 
     }, error => {
@@ -41,13 +41,15 @@ async function AddEventEntries(event) {
       let SwimmersBestTime = document.getElementById("SwimmersBestTime" + index);
       if (SwimmersEventSelector) {
         if (SwimmersBestTime) {
-          swEvents.push({ "Available": false, "BestTimeings": SwimmersBestTime.value, "EventName": SwimmersEventSelector.value });
+          swEvents.push({ "Available": true, "BestTimeings": SwimmersBestTime.value, "EventName": SwimmersEventSelector.value });
         }
       }
     }
     datatopost = {
-      "club": user.ClubName, "Group": ElegableGroup, "ID": user.swimmer_id, "Events": swEvents, "MeetName": MeetName, "MeetAddress": MeetAddress,
-      "MeetDate": MeetDate,"RegTime": formatDateManually(now)
+      "Club": user.clubname, "Group": ElegableGroup, "ID": user.swimmer_id, "Events": swEvents, 
+      "Gender": (user.gender == 1 ? "B" : "G"),"DOB": user.dob,
+       "RegTime": formatDateManually(now), "ClubShort": user.clubname,"PhotoPath_Local": user.photo,"PhotoPath_FB": user.photo
+      //  "MeetDate": MeetDate,"MeetName": MeetName
     };
     let FirebaseURL = MeetDataFirebaseBaseURL + HeatSelector.textContent + "/SwimmerDetails/" + user.name + ".json"
     await SaveEventToFB(FirebaseURL, datatopost)
@@ -93,56 +95,203 @@ function FillMeetnames(events) {
 }
 
 function showCard(eventDetails, daysLeft, rowId) {
-  document.getElementById("eventImage").src = "";
-  document.getElementById("meetName").textContent = eventDetails[rowId].MeetName;
-  document.getElementById("eventDate").textContent = new Date(eventDetails[rowId].MeetDate).toDateString();
-  document.getElementById("eventDays").textContent = `${daysLeft} days`;
-  document.getElementById("eventLocation").textContent = eventDetails[rowId].MeetAddress;
-  document.getElementById("eventType").textContent = eventDetails[rowId].NoOFEvents;
-  document.getElementById("eventDescription").textContent = "";
+  const details = eventDetails && eventDetails[rowId];
 
-  if (daysLeft > 0) {
-    document.getElementById("registerBtn").style.display = "inline-block";
+  document.getElementById("eventImage").src = "";
+  document.getElementById("meetName").textContent = details ? details.MeetName : "";
+  document.getElementById("eventDate").textContent = details && details.MeetDate ? new Date(details.MeetDate).toDateString() : "";
+  document.getElementById("eventDays").textContent = `${daysLeft} days`;
+  document.getElementById("eventLocation").textContent = details ? details.MeetAddress : "";
+  document.getElementById("eventType").textContent = details ? details.NoOFEvents : "";
+  document.getElementById("eventDescription").textContent = details ? (details.Description || "") : "";
+
+  const registerBtn = document.getElementById("registerBtn");
+  const entryStatus = document.getElementById("entryStatus");
+  if (!registerBtn) return;
+
+  // Only enable register button when the event is in the future AND EntryAccepted is true
+  const entryAccepted = details && (details.EntryAccepted === true || details.EntryAccepted === 'true');
+
+  if (daysLeft > 0 && entryAccepted) {
+    registerBtn.style.display = "inline-block";
+    registerBtn.disabled = false;
+    if (entryStatus) { entryStatus.style.display = 'none'; entryStatus.textContent = ''; }
   } else {
-    document.getElementById("registerBtn").style.display = "none";
+    registerBtn.style.display = "none";
+    registerBtn.disabled = true;
+    if (entryStatus) { entryStatus.style.display = 'block'; entryStatus.textContent = 'Entries are closed for this meet.'; }
   }
 }
 
-function ListApplicableEvents(selectedGroup, meetData) {
+function ListApplicableEvents(user, selectedGroup, meetData) {
 
   ShowActivitypop("Updating Events..");
 
-  const filteredEvents = meetData.EventList.filter(event => event.includes(`_${selectedGroup}_`));
+  // derive gender code
+  const genderCode = (typeof user !== 'undefined' && user.gender == 1) ? 'B' : 'G';
+
+  // support selectedGroup being a comma separated string or array
+  const groups = Array.isArray(selectedGroup)
+    ? selectedGroup
+    : (typeof selectedGroup === 'string' ? selectedGroup.split(',').map(s => s.trim()).filter(Boolean) : [selectedGroup]);
+
+  // helper to escape regex special chars
+  function escapeRegex(str) {
+    return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  const filteredEvents = Array.isArray(meetData.EventList) ? meetData.EventList.filter(ev => {
+    if (!ev || typeof ev !== 'string') return false;
+    // group match: underscore + group + (underscore or end)
+    const groupMatch = groups.some(g => {
+      if (!g) return false;
+      const re = new RegExp(`_${escapeRegex(g)}(?:_|$)`);
+      return re.test(ev);
+    });
+    if (!groupMatch) return false;
+    // gender match: underscore + gender + (underscore or end)
+    const genderRe = new RegExp(`_${escapeRegex(genderCode)}(?:_|$)`);
+    return genderRe.test(ev);
+  }) : [];
+
   NoOFEvents = meetData.NoOFEvents;
   const frmSwSelectedEvents = document.getElementById("frmEvet");
+  // ensure form is visible
+  if (frmSwSelectedEvents) {
+    frmSwSelectedEvents.style.display = 'block';
+  }
+
   frmSwSelectedEvents.innerHTML = "";
+
+  // load any previously saved swimmer entries for this user
+  const swimmerDetails = meetData && meetData.SwimmerDetails && meetData.SwimmerDetails[user && user.name];
+  const savedEvents = Array.isArray(swimmerDetails && swimmerDetails.Events) ? [...swimmerDetails.Events] : [];
+
   for (let index = 1; index <= meetData.NoOFEvents; index++) {
     CreateEventSelector(index, filteredEvents);
     AddTimeValidators("SwimmersBestTime" + index)
 
+    // if user already registered, pre-select event and time
+    const selectEl = document.getElementById("SwimmersEventSelector" + index);
+    const timeEl = document.getElementById("SwimmersBestTime" + index);
+    if (selectEl && savedEvents.length) {
+      const matchIdx = savedEvents.findIndex(e => {
+        return e && e.EventName && Array.from(selectEl.options).some(o => o.value === e.EventName);
+      });
+      if (matchIdx >= 0) {
+        const matched = savedEvents[matchIdx];
+        selectEl.value = matched.EventName;
+        if (timeEl) {
+          timeEl.value = matched.BestTimeings || '';
+          timeEl.disabled = false;
+        }
+        // remove used entry to avoid duplicates
+        savedEvents.splice(matchIdx, 1);
+      }
+    }
   }
-  // Create time input
-  const FormSubmit = document.createElement("button");
-  FormSubmit.textContent = "Register"
-  FormSubmit.type = "submit";
-  FormSubmit.addEventListener("onsubmit", () => { AddEventEntries(); });
-  frmSwSelectedEvents.appendChild(FormSubmit);
+
+  // determine if meet accepts entries
+  const selectedMeetName = (document.getElementById('meetName') && document.getElementById('meetName').textContent) ? document.getElementById('meetName').textContent : null;
+  const meetRegEntryAccepted = typeof MeetRegData !== 'undefined' && selectedMeetName && MeetRegData[selectedMeetName] && (MeetRegData[selectedMeetName].EntryAccepted === true || MeetRegData[selectedMeetName].EntryAccepted === 'true');
+  const meetDataEntryAccepted = meetData && (meetData.EntryAccepted === true || meetData.EntryAccepted === 'true');
+  const meetEntryAccepted = meetDataEntryAccepted || meetRegEntryAccepted;
+
+  // ensure a visible submit button exists (reuse if present)
+  let submitBtn = frmSwSelectedEvents.querySelector('button[type="submit"]');
+  if (!submitBtn) {
+    submitBtn = document.createElement("button");
+    submitBtn.type = "submit";
+    submitBtn.id = "frmSubmitBtn";
+    submitBtn.textContent = "Register";
+    // appending at end
+    frmSwSelectedEvents.appendChild(submitBtn);
+  }
+
+  // helper to set enabled/disabled styling for submit button
+  function setSubmitState(btn, enabled) {
+    if (!btn) return;
+    if (enabled) {
+      btn.disabled = false;
+      btn.style.backgroundColor = '#28a745';
+      btn.style.color = '#ffffff';
+      btn.style.cursor = 'pointer';
+      btn.style.opacity = '1';
+      btn.classList.remove('btn-disabled');
+      btn.classList.add('btn-enabled');
+    } else {
+      btn.disabled = true;
+      btn.style.backgroundColor = '#dddddd';
+      btn.style.color = '#666666';
+      btn.style.cursor = 'not-allowed';
+      btn.style.opacity = '0.9';
+      btn.classList.remove('btn-enabled');
+      btn.classList.add('btn-disabled');
+    }
+  }
+
+  // initialize submit button: disabled until a change is made by user
+  submitBtn.style.display = 'inline-block';
+  submitBtn.style.visibility = 'visible';
+  // always start disabled; only enable after a user change and entries accepted
+  setSubmitState(submitBtn, false);
+
+  // enable submit when the user interacts with any select or time input AND entries accepted
+  const enableSubmit = () => { if (meetEntryAccepted) setSubmitState(submitBtn, true); };
+  // attach to existing and future selects/inputs
+  const attachListeners = () => {
+    const selects = frmSwSelectedEvents.querySelectorAll('select.event-dropdown');
+    selects.forEach(s => {
+      s.removeEventListener('change', enableSubmit);
+      s.addEventListener('change', enableSubmit);
+    });
+    const times = frmSwSelectedEvents.querySelectorAll('input[id^="SwimmersBestTime"]');
+    times.forEach(t => {
+      t.removeEventListener('input', enableSubmit);
+      t.addEventListener('input', enableSubmit);
+    });
+  };
+  attachListeners();
+
+  // If entries are not accepted, keep submit disabled
+  if (!meetEntryAccepted) {
+    setSubmitState(submitBtn, false);
+  }
+
+  // update dropdowns to disable already selected options
+  for (let i = 1; i <= NoOFEvents; i++) {
+    try { updateDropdowns(i); } catch (e) { /* ignore */ }
+  }
+  // re-attach listeners in case update created/changed elements
+  attachListeners();
   ClearAllPop();
 }
 
 function CheckGroup(dobInput, meetData) {
   const dob = new Date(dobInput);
-  const eligibleGroups = meetData.GroupDetails.filter(group => {
+  const groups = meetData && meetData.GroupDetails;
+  if (!groups) return "";
+
+  const groupArray = Array.isArray(groups)
+    ? groups
+    : Object.keys(groups).map(key => {
+        const g = groups[key] || {};
+        return {
+          FromDate: g.FromDate,
+          ToDate: g.ToDate,
+          GroupName: g.GroupName || key
+        };
+      });
+
+  const eligibleGroups = groupArray.filter(group => {
     const from = new Date(group.FromDate);
     const to = new Date(group.ToDate);
-    return dob >= from && dob <= to;
+    return !isNaN(from) && !isNaN(to) && dob >= from && dob <= to;
   });
 
-  let eligibleGroup = ""
-  if (eligibleGroups.length > 0) {
-    eligibleGroup = eligibleGroups.map(g => g.GroupName).join(", ");
-  }
-  return eligibleGroup;
+  return eligibleGroups.length > 0
+    ? eligibleGroups.map(g => g.GroupName).join(", ")
+    : "";
 }
 async function FetchMeetNames() {
 
@@ -150,7 +299,7 @@ async function FetchMeetNames() {
   var dataAPI = fetch(MeetRegInfoFBURL)
     .then(response => {
       // ClearAllPop();
-      return response.json()
+      return response.json();
     })
     .then(data => {
       MeetRegData = data;
@@ -159,11 +308,14 @@ async function FetchMeetNames() {
 
       return MeetRegData;
 
-    }, error => {
+    })
+    .catch(error => {
       ClearAllPop();
       ShowMessagepop("Failed To Fetch MeetNames..");
       console.error('onRejected function called: ' + error.message);
-    })
+    });
+
+  return dataAPI;
 }
 
 async function SaveEventToFB(FirebaseURL, DataTopost) {

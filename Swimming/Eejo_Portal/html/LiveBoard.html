@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+  
+  <title>Live Swim Leaderboard</title>
+  <style>
+    /* TV-friendly full-board styles */
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #000;
+      margin: 0;
+      padding: 12px;
+      color: #e6ffb3;
+    }
+
+    h2 { text-align: center; margin: 0 0 8px 0; font-size: 28px }
+
+    #timer { font-size: 24px; text-align: center; margin: 6px 0 14px 0; font-weight: 700 }
+
+    #metadata { text-align: center; margin-bottom: 10px; font-size: 18px }
+
+    /* Full width leaderboard for TV display */
+    .leaderboard { width: 100%; max-width: 1200px; margin: 0 auto; border-collapse: separate; border-spacing: 0 8px }
+
+    .leaderboard th { text-align: left; padding: 10px 12px; color: #cfe9a8; font-size: 18px; }
+    .leaderboard td { background:#070707; padding: 12px; vertical-align: middle; color:#fff; }
+
+    .row-card { display: table-row; background: linear-gradient(90deg,#0a0a0c 0%, #0f1724 100%); border-radius:8px; opacity:0; transform:translateY(12px); animation: rowIn 420ms cubic-bezier(.2,.8,.2,1) both; }
+
+    @keyframes rowIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    .cell-rank { width:70px; font-size:20px; text-align:center; font-weight:700 }
+    .cell-lane { width:90px; font-size:18px; text-align:center }
+    .cell-name { font-size:20px; padding-left:12px }
+    .cell-time { width:200px; font-size:34px; font-weight:800; text-align:center; color:#a6ff4d }
+    .cell-club { font-size:14px; color:#bfc7b0 }
+    .cell-id { width:160px; font-size:16px; text-align:center }
+    .cell-status { width:80px; font-size:16px; text-align:center }
+
+    .swimmer-photo { width:80px; height:80px; object-fit:cover; border-radius:6px; border:2px solid rgba(255,255,255,0.06) }
+
+    @media(max-width:900px){ .leaderboard { font-size:12px } .cell-time{font-size:22px} }
+  </style>
+</head>
+
+<body>
+
+  <div id="metadata">
+    <table class="leaderboard">
+      <th colspan="3">
+        <h2>Live Board</h2>
+
+      </th>
+      <tr>
+        <td>
+          <div><strong>Event Name:</strong> <span id="event-name"></span></div>
+        </td>
+        <td>
+          <div><strong>Heat Start Time:</strong> <span id="heat-start"></span></div>
+        </td>
+        <td>
+          <div><strong>Heat Status:</strong> <span id="heat-status"></span></div>
+
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div><strong>Heat ID:</strong> <span id="heat-id"></span></div>
+        </td>
+
+        <td>
+          <div><strong>Heat End Time:</strong> <span id="heat-end"></span></div>
+        </td>
+        <td>
+          <div id="timer">Timer: 00:00:00</div>
+        </td>
+
+      </tr>
+
+
+    </table>
+  </div>
+
+  <table class="leaderboard" id="leaderboard-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Swimmer</th>
+        <th>Lane</th>
+        <th>Time</th>
+        <th>Swimmer ID</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Live Timer
+    let DQMsg = ["", "AB", "DQ", "DNC", "ES"]
+
+
+// Normalize string: trim; if not string, return empty string
+function normalizeStr(s) {
+  return typeof s === 'string' ? s.trim() : '';
+}
+
+/**
+ * Split a string at the last underscore and return both parts.
+ * - ok: true if a valid split point exists
+ * - prefix: text before the last underscore
+ * - suffix: text after the last underscore
+ * - lastIndex: index of the last underscore (or -1 when not found)
+ */
+function splitBeforeLastUnderscore(input) {
+  if (typeof input !== 'string') {
+    return { ok: false, prefix: null, suffix: null, lastIndex: -1 };
+  }
+
+  const lastIndex = input.lastIndexOf('_');
+
+  // No underscore found
+  if (lastIndex === -1) {
+    return { ok: false, prefix: null, suffix: null, lastIndex };
+  }
+
+  // If you want to treat leading "_" as invalid, change the line below to: if (lastIndex <= 0) { ... }
+  const prefix = input.slice(0, lastIndex);      // may be "" when "_" is first char
+  const suffix = input.slice(lastIndex + 1);     // may be "" when "_" is last char
+
+  return { ok: true, prefix, suffix, lastIndex };
+}
+
+/** Convenience: get text after the last underscore (empty string if none/at end). */
+function getTextAfterLastUnderscore(input) {
+  const { ok, suffix } = splitBeforeLastUnderscore(input);
+  return ok ? suffix : '';
+}
+
+
+function makeFourUnderscores(str) {
+  let count = (str.match(/_/g) || []).length;
+
+  while (count < 4) {
+    str += "_"; // Append underscore
+    count++;
+  }
+
+  return str;
+}
+
+function formatSwimmingEvent(HeatID, EventList) {
+  const strokeMap = {
+    FS: "Free Style",
+    BK: "Back stroke",
+    BRS: "Breaststroke",
+    FLY: "Butterfly",
+    IM: "Individual Medley",
+    IMRelay: "Individual Medley Relay",
+    FSRelay: "Free Style Relay",
+    KB: "Kick Board"
+  };
+  let displayNumber = 0
+
+
+  const genderMap = {
+    B: "Boys",
+    G: "Girls"
+  };
+  HeatID = makeFourUnderscores(HeatID)
+  const parts = HeatID.split("_");
+  const result = [];
+
+  const keyPrefix = normalizeStr(splitBeforeLastUnderscore(HeatID).prefix);
+  displayNumber = Array.isArray(EventList)
+    ? (EventList.indexOf(keyPrefix) + 1)
+    : 0; // fallback to running counter if EventList not an array
+
+  for (let i = 0; i < parts.length; i++) {
+    let part = parts[i];
+    if (i === 0) {
+      if (part != "") {
+        result.push(part + " "); // Add "M" prefix to first part
+      }
+    } 
+    // else if (GroupInfoDict[part]) {
+    //   result.push(part + ": (" + GroupInfoDict[part] + ")");
+    // }
+
+    // New: format group tokens like G01, G1 -> Group-01
+    else if (/^G(\d+)$/i.test(part)) {
+      const m = part.match(/^G(\d+)$/i);
+      const num = String(Number(m[1])).padStart(2, '0');
+      result.push(`Group-${num}`);
+    }
+
+    else if (strokeMap[part]) {
+      result.push(strokeMap[part]);
+    } else if (genderMap[part]) {
+      result.push(genderMap[part]);
+    } else if (i === parts.length - 1 && /^\d+$/.test(part)) {
+      result.push(`Heat-${part} `);
+    } else {
+      result.push(part);
+    }
+  }
+  const EventDetailsDict = { 'EventID': displayNumber, 'Distence': parts[0], 'Stroke': parts[1], 'Group': parts[2], 'Gender': parts[3], 'HeatID': parts[4] }
+  return { 'fullname': result.join(" "), 'EventDetailsDict': EventDetailsDict };
+}
+
+
+    let seconds = 0;
+    setInterval(() => {
+      seconds++;
+      const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      document.getElementById('timer').textContent = `Timer: ${hrs}:${mins}:${secs}`;
+    }, 1000);
+
+    // Image base URL derived from current page location (e.g. .../Swimming/Eejo_Portal/images/)
+    const imagesBase = (function(){
+      try{
+        return location.origin + location.pathname.replace(/\/html\/[^^/]*$/, '/images/');
+      }catch(e){ return location.origin + '/images/'; }
+    })();
+
+    // Fetch and update leaderboard every 2 seconds
+    let prevLastDetailsSignature = null;
+    async function updateLeaderboard() {
+      try {
+        // http://127.0.0.1:5501/Swimming/Eejo_Portal/html/LiveBoard.html?dataUrl=https://riviera-certificates-test-default-rtdb.firebaseio.com/Eejo/Events/Millennium_World_School_HASSAN_2025
+        // Extract dataUrl from query string
+        const params = new URLSearchParams(window.location.search);
+        const dataUrl = params.get('dataUrl');
+        if(!dataUrl){ console.error('dataUrl query parameter is required'); return; }
+
+        // Helper to fetch JSON with error handling
+        async function fetchJSON(u){
+          const r = await fetch(u);
+          if(!r.ok) throw new Error('Failed to fetch '+u+' status:'+r.status);
+          return await r.json();
+        }
+
+        // First fetch lastProcessedHeatDetails.json to get the heat name/ID
+        const base = dataUrl.endsWith('/') ? dataUrl.slice(0, -1) : dataUrl;
+        const lastUrl = base + '/lastProcessedHeatDetails.json';
+        let lastDetails = null;
+        let lastDetailsSignature = null;
+        try{
+          lastDetails = await fetchJSON(lastUrl);
+          lastDetailsSignature = JSON.stringify(lastDetails);
+        }catch(e){
+          // lastProcessedHeatDetails.json may be missing; we'll fallback to reading the base as heat JSON later
+          lastDetails = null;
+          lastDetailsSignature = null;
+        }
+
+        // If we have a lastDetails signature and it hasn't changed since last render, skip refresh
+        if(lastDetailsSignature && prevLastDetailsSignature === lastDetailsSignature){
+          // nothing changed; skip re-render
+          return;
+        }
+
+        // At this point either lastDetails changed (or didn't exist). Update prev signature when available.
+        if(lastDetailsSignature) prevLastDetailsSignature = lastDetailsSignature;
+
+        // Determine heat id / filename
+        let heatData = null;
+        if(lastDetails){
+          const heatId = lastDetails|| null;
+          if(heatId){
+            const heatUrl = base + '/' + heatId + '.json';
+            heatData = await fetchJSON(heatUrl);
+          }
+        }
+
+        // If lastDetails didn't give us heat data, fallback to fetching base as heat JSON
+        if(!heatData){
+          heatData = await fetchJSON(base);
+          // compute signature for fallback source to avoid repeated fetch/render
+          try{
+            const fallbackSig = JSON.stringify(heatData);
+            if(prevLastDetailsSignature === fallbackSig) return;
+            prevLastDetailsSignature = fallbackSig;
+          }catch(e){ /* ignore stringify errors */ }
+        }
+
+        // heatData should contain Boardinfo (array) and metadata fields
+        const meta = heatData || lastDetails || {};
+        document.getElementById('event-name').textContent = formatSwimmingEvent( splitBeforeLastUnderscore( meta.ID || meta.HeatID || (lastDetails && (lastDetails.ID || lastDetails.HeatID)) || '').prefix).fullname;
+        document.getElementById('heat-id').textContent =  getTextAfterLastUnderscore( meta.HeatID );
+        document.getElementById('heat-start').textContent = meta.HeatStartTime || '';
+        document.getElementById('heat-end').textContent = meta.HeatEndTime || '';
+        document.getElementById('heat-status').textContent = meta.HeatStatus != null ? String(meta.HeatStatus) : '';
+
+        const swimmers = (heatData && (heatData.Boardinfo || heatData.BoardInfo || heatData.BoardList)) || [];
+
+        // Helper to format seconds (e.g. 17.509 -> 00:17.509, supports minutes)
+        function formatTime(val){
+          if(val == null || isNaN(val)) return '00:00.000';
+          const s = Number(val);
+          const mins = Math.floor(s/60);
+          const secs = s - mins*60;
+          const mm = String(mins).padStart(2,'0');
+          const ss = String(Math.floor(secs)).padStart(2,'0');
+          const ms = String(Math.round((secs - Math.floor(secs))*1000)).padStart(3,'0');
+          return `${mm}:${ss}.${ms}`;
+        }
+
+        // Separate valid and zero-time swimmers
+        // Treat any swimmer with SwimStatus != 0 as Rank 0.
+        // validSwimmers: SwimStatus == 0 AND have a positive SwimTimings
+        const validSwimmers = swimmers
+          .filter(s => {
+            const status = s.SwimStatus == null ? '0' : String(s.SwimStatus);
+            return (status === '0') && (typeof s.SwimTimings === 'number') && (s.SwimTimings > 0);
+          })
+          .sort((a, b) => a.SwimTimings - b.SwimTimings);
+
+        // zeroTimeSwimmers: either no/zero timing OR non-zero SwimStatus (DQ/AB/etc.)
+        const zeroTimeSwimmers = swimmers.filter(s => {
+          const status = s.SwimStatus == null ? '0' : String(s.SwimStatus);
+          return (status !== '0') || !s.SwimTimings || s.SwimTimings === 0;
+        });
+
+        // Assign ranks (ties get same rank)
+        let currentRank = 1;
+        let previousTime = null;
+        validSwimmers.forEach((swimmer, index) => {
+          if (previousTime !== null && swimmer.SwimTimings !== previousTime) {
+            currentRank = index + 1;
+          }
+          swimmer.Rank = currentRank;
+          previousTime = swimmer.SwimTimings;
+        });
+
+        // Assign rank 0 to zero-time swimmers
+        zeroTimeSwimmers.forEach(swimmer => { swimmer.Rank = 0; });
+
+        // Combine and sort by BoardID
+        const rankedSwimmers = [...validSwimmers, ...zeroTimeSwimmers].sort((a, b) => (a.BoardID || 0) - (b.BoardID || 0));
+
+        // Update table - clear tbody and re-populate with staggered row animations
+        const tbody = document.querySelector('#leaderboard-table tbody');
+        tbody.innerHTML = '';
+
+        // Pre-fetch swimmer detail JSONs to obtain photo paths (if available)
+        async function fetchSwimmerPhotoFor(name){
+          //temp 
+          return imagesBase + "profile.jpg";
+          
+          if(!name) return null;
+          const cleanName = encodeURIComponent(name);
+          const url = base + '/SwimmerDetails/' + cleanName + 'PhotoPath_Local.json';
+          try{
+            const d = await fetchJSON(url);
+            let p = d && (d.photoPath || d.photoURL || d.photo || d.profilePhoto || d.photoFile || d.profile) || null;
+            if(!p) return null;
+            p = String(p).trim();
+            // If already an absolute URL, return as-is
+            if(/^https?:\/\//i.test(p) || /^\/\//.test(p)) return p;
+            // If p looks like a path (contains /) resolve relative to page
+            if(p.indexOf('/') !== -1){
+              try{ return new URL(p, location.href).href }catch(e){}
+            }
+            // Otherwise treat as filename and append to imagesBase
+            return imagesBase + encodeURIComponent(p);
+          }catch(e){ return null; }
+        }
+
+        const photoPromises = rankedSwimmers.map(s => fetchSwimmerPhotoFor(s.SwimerName || s.SwimmerName || s.Swimer || s.SwimerID || ''));
+        const photoUrls = await Promise.all(photoPromises);
+
+        rankedSwimmers.forEach((swimmer, idx) => {
+          const tr = document.createElement('tr'); tr.className = 'row-card';
+           const name = swimmer.SwimerName || swimmer.SwimmerName || swimmer.Swimer || '';
+           const id = swimmer.SwimerID || swimmer.SwimmerID || swimmer.SwimerId || '';
+           const lane = 'L:' + String((swimmer.BoardID != null ? swimmer.BoardID + 1 : '')).padStart(2,'0');
+           const timeDisplay = swimmer.SwimTimings && swimmer.SwimTimings > 0 ? formatTime(swimmer.SwimTimings) : '00:00.000';
+           const status = DQMsg[swimmer.SwimStatus] || '';
+           const photo = photoUrls[idx];
+
+          tr.innerHTML = `
+             <td class="cell-rank">${swimmer.Rank}</td>
+             <td class="cell-name"><div style="display:flex;align-items:center;gap:12px"><img class="swimmer-photo" src="${photo||''}" onerror="this.style.display='none'"> <div><div style="font-weight:700">${escapeHtml(name)}</div><div class="cell-club">${escapeHtml(swimmer.ClubName||swimmer.Club||'')}</div></div></div></td>
+             <td class="cell-lane">${lane}</td>
+             <td class="cell-time">${timeDisplay}</td>
+             <td class="cell-id">${escapeHtml(id)}</td>
+             <td class="cell-status">${status}</td>
+           `;
+          // stagger appearance
+          tr.style.animationDelay = (idx * 0.12) + 's';
+          tbody.appendChild(tr);
+         });
+
+        // small helper to avoid HTML injection from names
+        function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+      } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+      }
+    }
+
+    updateLeaderboard();
+    setInterval(updateLeaderboard, 2000);
+  </script>
+
+</body>
+
+</html>

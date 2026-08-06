@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registration Review / Edit</title>
+  <style>
+    :root{--bg:#f6f8fa;--panel:#fff;--muted:#6b7280;--accent:#2563eb}
+    body{font-family:Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);margin:0;padding:0}
+    .app{display:flex;height:100vh}
+    .sidebar{width:300px;background:var(--panel);border-right:1px solid #e5e7eb;padding:12px;overflow:auto}
+    .sidebar h2{margin:6px 0;font-size:16px}
+    .user-search{width:100%;padding:8px;margin-bottom:8px;border:1px solid #e5e7eb;border-radius:4px}
+    .user-list{list-style:none;padding:0;margin:0}
+    .user-list li{padding:8px;border-radius:4px;cursor:pointer;margin-bottom:6px;border:1px solid transparent}
+    .user-list li:hover{background:#f3f4f6;border-color:#e5e7eb}
+    .user-list li.active{background:#eef2ff;border-color:#c7d2fe}
+    .main{flex:1;padding:16px;overflow:auto}
+    .header-row{display:flex;justify-content:space-between;align-items:center}
+    .card{background:var(--panel);padding:12px;border-radius:6px;border:1px solid #e5e7eb;margin-top:12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=text],input[type=email],input[type=date],select,input[type=password]{width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:4px}
+    .photos{display:flex;gap:12px}
+    .photo{width:220px;height:160px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-direction:column;overflow:hidden}
+    .photo img{max-width:100%;max-height:100%;object-fit:contain}
+    .photo small{color:var(--muted);font-size:12px}
+    .controls{margin-top:10px;display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+    .btn-save{background:var(--accent);color:#fff}
+    .btn-download{background:#f3f4f6;color:#111}
+    .meta{font-size:13px;color:var(--muted)}
+    @media(max-width:900px){.app{flex-direction:column}.sidebar{width:100%;height:220px;order:2}.main{order:1}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h2>Registered Users</h2>
+      <input id="searchUser" class="user-search" placeholder="Search by name, club or id">
+      <ul id="userList" class="user-list" role="list"></ul>
+      <div class="card" style="margin-top:12px">
+        <div class="meta">Actions</div>
+        <div class="controls" style="margin-top:8px">
+          <button id="btnImport" class="btn btn-download">Import JSON</button>
+          <button id="btnExport" class="btn btn-download">Export JSON</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="header-row">
+        <h1 id="pageTitle">Review / Edit Registration</h1>
+        <div>
+          <button id="btnSave" class="btn btn-save">Save Changes</button>
+        </div>
+      </div>
+
+      <section id="detailArea" class="card" aria-live="polite">
+        <div class="meta">Select a user from the left to view and edit details</div>
+        <div id="userForm" style="display:none">
+          <div class="grid">
+            <div>
+              <label>Name</label>
+              <input type="text" id="u_name">
+              <label>Date of Birth</label>
+              <input type="date" id="u_dob">
+              <label>Gender</label>
+              <select id="u_gender"><option value="1">Male</option><option value="2">Female</option><option value="3">Other</option></select>
+              <label>Email</label>
+              <input type="email" id="u_email">
+              <label>Phone</label>
+              <input type="text" id="u_phone">
+              <label>Club / School</label>
+              <input type="text" id="u_club">
+              <label>School Name</label>
+              <input type="text" id="u_schoolname">
+            </div>
+
+            <div>
+              <label>Swimmer ID</label>
+              <input type="text" id="u_swimmer_id">
+              <label>Club Short</label>
+              <input type="text" id="u_club_short">
+              <label>Role</label>
+              <select id="u_role"><option value="1">Swimmer</option><option value="2">Parent</option><option value="3">Coach</option></select>
+              <label style="margin-top:10px">New Password (leave blank to keep)</label>
+              <input type="password" id="u_password" placeholder="Enter new password">
+              <label>Confirm Password</label>
+              <input type="password" id="u_confirm_password" placeholder="Confirm new password">
+              <div style="height:12px"></div>
+              <div class="meta">Photo uploads (choose new to replace)</div>
+              <label style="margin-top:6px">Profile Photo <input type="file" id="file_profile" accept="image/*"></label>
+              <label>School ID <input type="file" id="file_id1" accept="image/*"></label>
+              <label>Age Proof <input type="file" id="file_id2" accept="image/*"></label>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="meta">Photos</div>
+            <div class="photos" style="margin-top:8px">
+              <div class="photo" id="viewer_profile"><small>Profile Photo</small></div>
+              <div class="photo" id="viewer_id1"><small>School ID</small></div>
+              <div class="photo" id="viewer_id2"><small>Age Proof</small></div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="controls">
+            <button id="btnSaveLocal" class="btn btn-save">Save to Firebase</button>
+            <button id="btnDownload" class="btn btn-download">Download JSON</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <input id="fileImport" type="file" accept="application/json" style="display:none">
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+    import { firebaseConfig } from "../js/DFBC.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    const listEl = document.getElementById('userList');
+    const searchEl = document.getElementById('searchUser');
+    const fileImport = document.getElementById('fileImport');
+    const btnImport = document.getElementById('btnImport');
+    const btnExport = document.getElementById('btnExport');
+    const btnSave = document.getElementById('btnSave');
+    const btnSaveLocal = document.getElementById('btnSaveLocal');
+    const btnDownload = document.getElementById('btnDownload');
+
+    let users = {}; // map by swimmer_id
+    let selectedKey = null; // swimmer_id
+
+    async function loadUsersFromFirestore() {
+      users = {};
+      try {
+        const snapshot = await getDocs(collection(db, 'swimmers'));
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const key = data.swimmer_id || docSnap.id;
+          users[key] = { ...data, _docId: docSnap.id };
+        });
+        renderList();
+      } catch (err) {
+        console.error('Failed to load swimmers from Firestore', err);
+        users = {};
+        renderList();
+      }
+    }
+
+    function renderList(filter){
+      listEl.innerHTML = '';
+      const keys = Object.keys(users);
+      keys.forEach(k=>{
+        const u = users[k];
+        const text = `${u.name || k} ${u.clubname ? '('+u.clubname+')':''}`;
+        if(filter && !text.toLowerCase().includes(filter.toLowerCase())) return;
+        const li = document.createElement('li');
+        li.textContent = text;
+        li.dataset.key = k;
+        li.addEventListener('click', ()=>selectUser(k, li));
+        if(k===selectedKey) li.classList.add('active');
+        listEl.appendChild(li);
+      })
+    }
+
+    function selectUser(key, liEl){
+      selectedKey = key;
+      document.querySelectorAll('.user-list li').forEach(n=>n.classList.remove('active'));
+      if(liEl) liEl.classList.add('active');
+      const u = users[key];
+      if(!u) return;
+      document.getElementById('userForm').style.display = 'block';
+      document.getElementById('u_name').value = u.name || '';
+      document.getElementById('u_dob').value = u.dob || '';
+      document.getElementById('u_gender').value = u.gender || '1';
+      document.getElementById('u_email').value = u.email || '';
+      document.getElementById('u_phone').value = u.phone || '';
+      document.getElementById('u_club').value = u.clubname || '';
+      document.getElementById('u_schoolname').value = u.schoolname || '';
+      document.getElementById('u_swimmer_id').value = u.swimmer_id || '';
+      document.getElementById('u_club_short').value = u.clubshort || '';
+      document.getElementById('u_role').value = u.role || '1';
+      document.getElementById('u_password').value = '';
+      document.getElementById('u_confirm_password').value = '';
+      showPhoto('viewer_profile', u.photoPath);
+      showPhoto('viewer_id1', u.id1Path);
+      showPhoto('viewer_id2', u.id2Path);
+    }
+
+    function showPhoto(containerId, src){
+      const el = document.getElementById(containerId);
+      el.innerHTML = '';
+      if(!src){
+        const s = document.createElement('small'); s.textContent = 'No image'; el.appendChild(s); return;
+      }
+      const img = document.createElement('img'); img.src = src; img.alt = ''; el.appendChild(img);
+    }
+
+    async function uploadImageAndGetURL(file, pathPrefix) {
+      if(!file) return null;
+      const fileName = file.name || ('file_' + Date.now());
+      const storageRef = ref(storage, `${pathPrefix}/${fileName}`);
+      return new Promise((resolve, reject)=>{
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        uploadTask.on('state_changed', null, reject, async ()=>{
+          try{
+            const url = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve(url);
+          }catch(e){reject(e)}
+        });
+      });
+    }
+
+    document.getElementById('file_profile').addEventListener('change', async function(){
+      if(!selectedKey) { alert('Select a user first'); this.value=''; return; }
+      const file = this.files[0];
+      if(!file) return;
+      const user = users[selectedKey];
+      const path = `photos/${user.swimmer_id || selectedKey}`;
+      try{
+        const url = await uploadImageAndGetURL(file, path);
+        user.photoPath = url;
+        showPhoto('viewer_profile', url);
+        if(user._docId) await updateDoc(doc(db,'swimmers',user._docId), { photoPath: url });
+      }catch(e){console.error('Upload failed',e); alert('Upload failed');}
+    });
+
+    document.getElementById('file_id1').addEventListener('change', async function(){
+      if(!selectedKey) { alert('Select a user first'); this.value=''; return; }
+      const file = this.files[0];
+      if(!file) return;
+      const user = users[selectedKey];
+      const path = `ids/${user.swimmer_id || selectedKey}/id1`;
+      try{
+        const url = await uploadImageAndGetURL(file, path);
+        user.id1Path = url;
+        showPhoto('viewer_id1', url);
+        if(user._docId) await updateDoc(doc(db,'swimmers',user._docId), { id1Path: url });
+      }catch(e){console.error('Upload failed',e); alert('Upload failed');}
+    });
+
+    document.getElementById('file_id2').addEventListener('change', async function(){
+      if(!selectedKey) { alert('Select a user first'); this.value=''; return; }
+      const file = this.files[0];
+      if(!file) return;
+      const user = users[selectedKey];
+      const path = `ids/${user.swimmer_id || selectedKey}/id2`;
+      try{
+        const url = await uploadImageAndGetURL(file, path);
+        user.id2Path = url;
+        showPhoto('viewer_id2', url);
+        if(user._docId) await updateDoc(doc(db,'swimmers',user._docId), { id2Path: url });
+      }catch(e){console.error('Upload failed',e); alert('Upload failed');}
+    });
+
+    async function encodePassword(password) {
+      if(!password) return null;
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function applyEditsToUser(){
+      if(!selectedKey) return false;
+      const u = users[selectedKey];
+      u.name = document.getElementById('u_name').value;
+      u.dob = document.getElementById('u_dob').value;
+      u.gender = parseInt(document.getElementById('u_gender').value);
+      u.email = document.getElementById('u_email').value;
+      u.phone = document.getElementById('u_phone').value;
+      u.clubname = document.getElementById('u_club').value;
+      u.schoolname = document.getElementById('u_schoolname').value;
+      u.swimmer_id = document.getElementById('u_swimmer_id').value;
+      u.clubshort = document.getElementById('u_club_short').value;
+      u.role = parseInt(document.getElementById('u_role').value);
+
+      const newPassword = document.getElementById('u_password').value;
+      const confirm = document.getElementById('u_confirm_password').value;
+      if (newPassword) {
+        if (newPassword !== confirm) { alert('Passwords do not match'); return false; }
+        u.password = await encodePassword(newPassword);
+      }
+
+      try{
+        // Build payload but only set photo/id/password fields when non-empty to retain existing DB values
+        const payload = {
+          name: u.name,
+          dob: u.dob,
+          gender: u.gender,
+          email: u.email,
+          phone: u.phone,
+          clubname: u.clubname,
+          schoolname: u.schoolname,
+          swimmer_id: u.swimmer_id,
+          clubshort: u.clubshort,
+          role: u.role
+        };
+
+        if (typeof u.photoPath !== 'undefined' && u.photoPath !== '') payload.photoPath = u.photoPath;
+        if (typeof u.id1Path !== 'undefined' && u.id1Path !== '') payload.id1Path = u.id1Path;
+        if (typeof u.id2Path !== 'undefined' && u.id2Path !== '') payload.id2Path = u.id2Path;
+        if (typeof u.password !== 'undefined' && u.password !== '') payload.password = u.password;
+
+        if(u._docId){
+          await updateDoc(doc(db,'swimmers',u._docId), payload);
+        } else {
+          const ref = await addDoc(collection(db,'swimmers'), payload);
+          u._docId = ref.id;
+        }
+        await loadUsersFromFirestore();
+        return true;
+      }catch(e){ console.error('Save failed', e); alert('Save failed'); return false; }
+    }
+
+    btnSaveLocal.addEventListener('click', async ()=>{
+      if(await applyEditsToUser()) alert('Saved to Firebase');
+    });
+
+    btnSave.addEventListener('click', async ()=>{
+      if(await applyEditsToUser()) alert('Saved');
+    });
+
+    btnDownload.addEventListener('click', async ()=>{
+      if(await applyEditsToUser()){
+        const snapshot = await getDocs(collection(db,'swimmers'));
+        const out = {};
+        snapshot.forEach(s=>{ out[s.data().swimmer_id || s.id] = s.data(); });
+        const dataStr = JSON.stringify(out, null, 2);
+        const blob = new Blob([dataStr], {type:'application/json'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'registered-users.json'; document.body.appendChild(a); a.click(); a.remove();
+      }
+    });
+
+    btnImport.addEventListener('click', ()=> fileImport.click());
+    fileImport.addEventListener('change', function(e){
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = async ()=>{
+        try{
+          const data = JSON.parse(reader.result);
+          let map = {};
+          if(Array.isArray(data)){
+            data.forEach((u,i)=>{ map[u.swimmer_id||u.name||('u'+i)] = u });
+          } else { map = data }
+          for(const k of Object.keys(map)){
+            const u = map[k];
+            const all = await getDocs(collection(db,'swimmers'));
+            const existing = all.docs.find(d => (d.data().swimmer_id===u.swimmer_id));
+            if(existing){ await updateDoc(doc(db,'swimmers',existing.id), u); }
+            else { await addDoc(collection(db,'swimmers'), u); }
+          }
+          await loadUsersFromFirestore();
+          alert('Import complete');
+        }catch(err){ alert('Invalid JSON file') }
+      }
+      reader.readAsText(f);
+    });
+
+    btnExport.addEventListener('click', async ()=>{
+      alert('Export will download current Firestore snapshot');
+      const snapshot = await getDocs(collection(db,'swimmers'));
+      const out = {};
+      snapshot.forEach(s=>{ out[s.data().swimmer_id || s.id] = s.data(); });
+      const dataStr = JSON.stringify(out, null, 2);
+      const blob = new Blob([dataStr], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'registered-users-export.json'; document.body.appendChild(a); a.click(); a.remove();
+    });
+
+    searchEl.addEventListener('input', ()=>renderList(searchEl.value));
+
+    await loadUsersFromFirestore();
+  </script>
+</body>
+</html>

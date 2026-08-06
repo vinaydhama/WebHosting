@@ -1299,25 +1299,70 @@
       }
 
       async function initMeetNames(HeatFileSource) {
-        new MultiSelect('#MeetSelect', {
-          data: MeetNameArray,
-          placeholder: 'Select Meet',
-          search: true,
-          selectAll: false,
-          listAll: true,
-          max: 1,
-          onChange: function (value, text, element) {
-            ////console.log('Change:', value, text, element);
-          },
-          onSelect: async function (value, text, element) {
-            ClearTable('tblMeet');
-            ClearTable('tblGroups');
-            ClearTable('tblEvents');
-            ClearTable('tblSwDetails');
-            ClearTable('tblHeatDetails');
+        // Populate plain <select id="MeetSelect"> and wire up change handling
+        const meetSelect = document.getElementById('MeetSelect');
+        if (!meetSelect) return;
+        // clear existing options
+        meetSelect.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- Select Meet --';
+        meetSelect.appendChild(defaultOption);
 
-            if (HeatFileSource == "Online") {
-              Meetdteails = GetMeetDetails(MeetDataFirebase, value);
+        // support MeetNameArray as array of strings or objects, or as an object map
+        if (Array.isArray(MeetNameArray)) {
+          MeetNameArray.forEach(item => {
+            let val, txt;
+            if (typeof item === 'string') {
+              val = txt = item;
+            } else if (item && typeof item === 'object') {
+              val = item.value || item.id || item.name || item.text || JSON.stringify(item);
+              txt = item.text || item.name || item.value || item.id || String(item);
+            } else {
+              val = txt = String(item);
+            }
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = txt;
+            meetSelect.appendChild(opt);
+          });
+        } else if (MeetNameArray && typeof MeetNameArray === 'object') {
+          Object.keys(MeetNameArray).forEach(k => {
+            const opt = document.createElement('option');
+            opt.value = k;
+            opt.textContent = k;
+            meetSelect.appendChild(opt);
+          });
+        }
+
+        meetSelect.addEventListener('change', async function () {
+          const value = this.value;
+          if (!value) return;
+          ClearTable('tblMeet');
+          ClearTable('tblGroups');
+          ClearTable('tblEvents');
+          ClearTable('tblSwDetails');
+          ClearTable('tblHeatDetails');
+
+          if (HeatFileSource == "Online") {
+            Meetdteails = GetMeetDetails(MeetDataFirebase, value);
+            MeetUpdatedData = Meetdteails.CurrentMeet;
+            GenerateMeetTable(Meetdteails.MeetName, Meetdteails.MeetAddress, Meetdteails.MeetDate, Meetdteails.Boards);
+            GenerateGroupTable(Meetdteails.GroupDetails);
+            ReloadData('Groups');
+            GenerateEventTable(Meetdteails.EventList);
+            ReloadData('Events');
+            GenerateSwimmersTable(Meetdteails.SwimmerDetails);
+            GenerateHeatDetailsTable(Meetdteails.HeatList);
+          }
+          else if (HeatFileSource == "Offline") {
+            cmdurl = cmdurlwithHost + "/SetLiveHeatCommands?CmdName=ReadHeatFromLocalFile&HeatFileName=" + value;
+
+            try {
+              let response = await fetch(cmdurl);
+              let data = await response.json();
+              MeetDataFirebase = data.commandReturnData;
+              Meetdteails = ExtractMeetInfo(MeetDataFirebase, value);
               MeetUpdatedData = Meetdteails.CurrentMeet;
               GenerateMeetTable(Meetdteails.MeetName, Meetdteails.MeetAddress, Meetdteails.MeetDate, Meetdteails.Boards);
               GenerateGroupTable(Meetdteails.GroupDetails);
@@ -1325,38 +1370,12 @@
               GenerateEventTable(Meetdteails.EventList);
               ReloadData('Events');
               GenerateSwimmersTable(Meetdteails.SwimmerDetails);
-              GenerateHeatDetailsTable(Meetdteails.HeatList)
-            }
-            else if (HeatFileSource == "Offline") {
-              cmdurl = cmdurlwithHost + "/SetLiveHeatCommands?CmdName=ReadHeatFromLocalFile&HeatFileName=" + value;
-
-              try {
-                let response = await fetch(cmdurl);
-                let data = await response.json();
-                // console.log(data);
-                MeetDataFirebase = data.commandReturnData;
-                // MeetNameArray = LoadHeatFileName(data);
-                Meetdteails = ExtractMeetInfo(MeetDataFirebase, value);
-                MeetUpdatedData = Meetdteails.CurrentMeet;
-                GenerateMeetTable(Meetdteails.MeetName, Meetdteails.MeetAddress, Meetdteails.MeetDate, Meetdteails.Boards);
-                GenerateGroupTable(Meetdteails.GroupDetails);
-                ReloadData('Groups');
-                GenerateEventTable(Meetdteails.EventList);
-                ReloadData('Events');
-                GenerateSwimmersTable(Meetdteails.SwimmerDetails);
-                GenerateHeatDetailsTable(Meetdteails.HeatList)
-
-              } catch (error) {
-                console.error('Error fetching data:', error);
-              }
-
-              // CmdToSend = "CmdName=" + "SaveHeatFileToLocalFile" + "&HeatData=" + JSON.stringify(MeetUpdatedData) + "&FileNametoSave=" + "TestMeet1.EejoHeat";
-
+              GenerateHeatDetailsTable(Meetdteails.HeatList);
+            } catch (error) {
+              console.error('Error fetching data:', error);
             }
 
-
-          },
-          onUnselect: function (value, text, element) {
+            // CmdToSend = "CmdName=" + "SaveHeatFileToLocalFile" + "&HeatData=" + JSON.stringify(MeetUpdatedData) + "&FileNametoSave=" + SelectedMeetFile + ".EejoHeat";
           }
         });
       }
